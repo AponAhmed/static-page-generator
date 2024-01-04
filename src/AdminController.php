@@ -141,79 +141,79 @@ class AdminController extends adminViews
         );
     }
 
-    function setStaticManualGenerateEvent()
-    {
-        $args = array(
-            'post_type' => $this->options['postType'],
-            'fields' => 'ids',
-            'meta_query' => array(
-                array(
-                    'key' => 'static_manualGenerate',
-                    'value' => '1',
-                    'compare' => '='
-                ),
-            )
-        );
-        $query = new \WP_Query($args);
-        $info = [];
-        if ($query->post_count > 0) {
-            foreach ($query->posts as $id) {
-                $total = get_post_meta($id, 'numberOfGenerate', true);
-                $generated = $this->countLinks($id);
-                if ($generated < $total) { //Not Complete 
-                    ob_start();
-                    $this->generateStaticPageSingle($id);
-                    $resp = ob_get_clean();
-                    $respArr = json_decode($resp, true);
-                    if (isset($respArr['lIndex'])) {
-                        $info[] = ['id' => $id, 'done' => $respArr['lIndex'], 'total' => $total];
-                    }
-                } else {
-                    $info[] = ['id' => $id, 'done' => $total, 'total' => $total];
-                }
-            }
-        }
-        echo json_encode($info);
-        wp_die();
-    }
+    // function setStaticManualGenerateEvent()
+    // {
+    //     $args = array(
+    //         'post_type' => $this->options['postType'],
+    //         'fields' => 'ids',
+    //         'meta_query' => array(
+    //             array(
+    //                 'key' => 'static_manualGenerate',
+    //                 'value' => '1',
+    //                 'compare' => '='
+    //             ),
+    //         )
+    //     );
+    //     $query = new \WP_Query($args);
+    //     $info = [];
+    //     if ($query->post_count > 0) {
+    //         foreach ($query->posts as $id) {
+    //             $total = get_post_meta($id, 'numberOfGenerate', true);
+    //             $generated = $this->countLinks($id);
+    //             if ($generated < $total) { //Not Complete 
+    //                 ob_start();
+    //                 $this->generateStaticPageSingle($id);
+    //                 $resp = ob_get_clean();
+    //                 $respArr = json_decode($resp, true);
+    //                 if (isset($respArr['lIndex'])) {
+    //                     $info[] = ['id' => $id, 'done' => $respArr['lIndex'], 'total' => $total];
+    //                 }
+    //             } else {
+    //                 $info[] = ['id' => $id, 'done' => $total, 'total' => $total];
+    //             }
+    //         }
+    //     }
+    //     echo json_encode($info);
+    //     wp_die();
+    // }
 
-    function manualGenerateStatus()
-    {
-        if (isset($_POST['postID']) && !empty($_POST['postID'])) {
-            $id = $_POST['postID'];
-            $currentStatus = get_post_meta($id, 'static_manualGenerate', true);
-            if ($currentStatus === false) {
-                $currentStatus = "0";
-            }
+    // function manualGenerateStatus()
+    // {
+    //     if (isset($_POST['postID']) && !empty($_POST['postID'])) {
+    //         $id = $_POST['postID'];
+    //         $currentStatus = get_post_meta($id, 'static_manualGenerate', true);
+    //         if ($currentStatus === false) {
+    //             $currentStatus = "0";
+    //         }
 
-            if ($currentStatus == '0') {
-                $currentStatus = '1';
-                update_post_meta($id, 'cronStatus', '0'); //Disable from Cron When Manual Generate 
-                $this->generateStaticPage($id);
-            } else {
-                $currentStatus = '0';
-            }
-            update_post_meta($id, 'static_manualGenerate', $currentStatus);
-            ob_get_clean();
+    //         if ($currentStatus == '0') {
+    //             $currentStatus = '1';
+    //             update_post_meta($id, 'cronStatus', '0'); //Disable from Cron When Manual Generate 
+    //             $this->generateStaticPage($id);
+    //         } else {
+    //             $currentStatus = '0';
+    //         }
+    //         update_post_meta($id, 'static_manualGenerate', $currentStatus);
+    //         ob_get_clean();
 
-            echo $currentStatus;
-        }
-        wp_die();
-    }
+    //         echo $currentStatus;
+    //     }
+    //     wp_die();
+    // }
 
-    function changeStaticCronStatus()
-    {
-        if (isset($_POST['postID']) && !empty($_POST['postID']) && isset($_POST['status']) && !empty($_POST['status'])) {
-            $st = '0';
-            $id = $_POST['postID'];
-            if ($_POST['status'] == 'true') {
-                $st = '1';
-                $this->generateStaticPage($id);
-            }
-            update_post_meta($id, 'cronStatus', $st);
-        }
-        wp_die();
-    }
+    // function changeStaticCronStatus()
+    // {
+    //     if (isset($_POST['postID']) && !empty($_POST['postID']) && isset($_POST['status']) && !empty($_POST['status'])) {
+    //         $st = '0';
+    //         $id = $_POST['postID'];
+    //         if ($_POST['status'] == 'true') {
+    //             $st = '1';
+    //             $this->generateStaticPage($id);
+    //         }
+    //         update_post_meta($id, 'cronStatus', $st);
+    //     }
+    //     wp_die();
+    // }
 
     function keyFiles($dir = false)
     {
@@ -309,125 +309,127 @@ class AdminController extends adminViews
         return $this->keyFiles($dir);
     }
 
-    function quickLinkGenerate()
-    {
-        self::debug();
-        if (isset($_POST['str']) && !empty($_POST['str'])) {
-            $str = trim($_POST['str']);
-            $lines = preg_split("/\r\n|\n|\r/", $str);
-            $resp = [];
-            foreach ($lines as $line) {
-                $part = explode('|', $line);
-                $id = $part[0];
-                $shortCods = $part[1];
-                $slug = isset($part[2]) ? $part[2] : "";
-                $orgLink = get_permalink($id);
-                if (empty($slug)) {
-                    continue;
-                }
-                $fileName = __SPG_CONTENT . "temp/$id.html";
-                if (!file_exists($fileName)) {
-                    $this->generateStaticPage($id);
-                }
-                $content = file_get_contents($fileName);
-                //Temp Generated
-                //$keywordFile = get_post_meta($id, 'keywordFile', true);
-                //$codes = $this->getShortcodes($keywordFile);
-                //Shortcodes
-                $codesInf = explode(",", $shortCods);
-                $find = [];
-                $replace = [];
-                foreach ($codesInf as $inf) {
-                    $codePart = explode(":", $inf);
-                    $find[] = "{" . $codePart[0] . "}";
-                    $replace[] = $codePart[1];
-                }
-                $content = str_replace($find, $replace, $content);
+    // function quickLinkGenerate()
+    // {
+    //     self::debug();
+    //     if (isset($_POST['str']) && !empty($_POST['str'])) {
+    //         $str = trim($_POST['str']);
+    //         $lines = preg_split("/\r\n|\n|\r/", $str);
+    //         $resp = [];
+    //         foreach ($lines as $line) {
+    //             $part = explode('|', $line);
+    //             $id = $part[0];
+    //             $shortCods = $part[1];
+    //             $slug = isset($part[2]) ? $part[2] : "";
+    //             $orgLink = get_permalink($id);
+    //             if (empty($slug)) {
+    //                 continue;
+    //             }
+    //             $fileName = __SPG_CONTENT . "temp/$id.html";
+    //             if (!file_exists($fileName)) {
+    //                 $this->generateStaticPage($id);
+    //             }
+    //             $content = file_get_contents($fileName);
+    //             //Temp Generated
+    //             //$keywordFile = get_post_meta($id, 'keywordFile', true);
+    //             //$codes = $this->getShortcodes($keywordFile);
+    //             //Shortcodes
+    //             $codesInf = explode(",", $shortCods);
+    //             $find = [];
+    //             $replace = [];
+    //             foreach ($codesInf as $inf) {
+    //                 $codePart = explode(":", $inf);
+    //                 $find[] = "{" . $codePart[0] . "}";
+    //                 $replace[] = $codePart[1];
+    //             }
+    //             $content = str_replace($find, $replace, $content);
 
-                $content = $this->internalLinkFilter($content, $slug); //Slug for Skip
+    //             $content = $this->internalLinkFilter($content, $slug); //Slug for Skip
 
-                $slug = str_replace($find, $replace, $slug);
-                $slug = $this->slugFilter($slug);
+    //             $slug = str_replace($find, $replace, $slug);
+    //             $slug = $this->slugFilter($slug);
 
-                $actualLink = $this->ActualLink($slug);
-                $content = str_replace($orgLink, $actualLink, $content);
+    //             $actualLink = $this->ActualLink($slug);
+    //             $content = str_replace($orgLink, $actualLink, $content);
 
-                $res = $this->writeFile($content, $slug);
-                if ($res) {
-                    $resp[] = $actualLink;
-                }
-            }
-            echo json_encode($resp);
-        }
-        wp_die();
-    }
+    //             $res = $this->writeFile($content, $slug);
+    //             if ($res) {
+    //                 $resp[] = $actualLink;
+    //             }
+    //         }
+    //         echo json_encode($resp);
+    //     }
+    //     wp_die();
+    // }
 
     /**
      * Ajax Request for curl data of page and store temp with page id
      */
-    function generateStaticPage($id = false)
+    // function generateStaticPage($id = false)
+    // {
+    //     update_option('staticGmood', '1');
+    //     $die = false;
+    //     if (isset($_POST['id']) && !empty($_POST['id'])) {
+    //         $id = $_POST['id'];
+    //         $die = true;
+    //     }
+    //     if ($id) {
+    //         //Limit of Generated
+    //         if (isset($_POST['limit'])) {
+    //             update_post_meta($id, 'numberOfGenerate', trim($_POST['limit']));
+    //         }
+    //         $link = get_permalink($id);
+    //         $http = new \WP_Http();
+    //         $response = @$http->request($link, ['timeout' => 120]);
+
+    //         if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
+    //             $fileName = __SPG_CONTENT . "temp/$id.html";
+    //             //existing File of Links by ID
+    //             //$linksFile = __SPG_CONTENT . "links/$id.txt";
+    //             //if (file_exists($linksFile)) {
+    //             // unlink($linksFile);
+    //             // }
+    //             if (file_put_contents($fileName, $response['body'])) {
+    //                 echo json_encode(['error' => false, 'id' => $id]);
+    //             } else {
+    //                 echo json_encode(['error' => true, 'msg' => "Page content couldn't Stored"]);
+    //             }
+    //         } else {
+    //             //error
+    //             echo json_encode(['error' => true, 'msg' => 'Page content Retrive Error:' . $response['response']['code']]);
+    //         }
+    //     }
+    //     update_option('staticGmood', '0');
+    //     if ($die) {
+    //         wp_die();
+    //     }
+    // }
+
+    // public function getContentById($id)
+    // {
+    //     //return ['id' => $id];
+    //     //ob_start();
+    //     error_reporting(0);
+    //     update_option('staticGmood', '1');
+
+    //     $link = get_permalink($id);
+    //     $http = new \WP_Http();
+    //     $response = @$http->request($link, ['timeout' => 120]);
+
+    //     update_option('staticGmood', '0');
+    //     //ob_clean();
+    //     //WP_Error
+    //     if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
+    //         $re = '/postid-(\d+)/m';
+    //         return preg_replace($re, "", $response['body']);
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
+    function generateStaticPageAll($id = false, $limit = 200)
     {
-        update_option('staticGmood', '1');
-        $die = false;
-        if (isset($_POST['id']) && !empty($_POST['id'])) {
-            $id = $_POST['id'];
-            $die = true;
-        }
-        if ($id) {
-            //Limit of Generated
-            if (isset($_POST['limit'])) {
-                update_post_meta($id, 'numberOfGenerate', trim($_POST['limit']));
-            }
-            $link = get_permalink($id);
-            $http = new \WP_Http();
-            $response = @$http->request($link, ['timeout' => 120]);
-
-            if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
-                $fileName = __SPG_CONTENT . "temp/$id.html";
-                //existing File of Links by ID
-                //$linksFile = __SPG_CONTENT . "links/$id.txt";
-                //if (file_exists($linksFile)) {
-                // unlink($linksFile);
-                // }
-                if (file_put_contents($fileName, $response['body'])) {
-                    echo json_encode(['error' => false, 'id' => $id]);
-                } else {
-                    echo json_encode(['error' => true, 'msg' => "Page content couldn't Stored"]);
-                }
-            } else {
-                //error
-                echo json_encode(['error' => true, 'msg' => 'Page content Retrive Error:' . $response['response']['code']]);
-            }
-        }
-        update_option('staticGmood', '0');
-        if ($die) {
-            wp_die();
-        }
-    }
-
-    function getContentById($id)
-    {
-        //ob_start();
-        error_reporting(0);
-        update_option('staticGmood', '1');
-
-        $link = get_permalink($id);
-        $http = new \WP_Http();
-        $response = @$http->request($link, ['timeout' => 120]);
-
-        update_option('staticGmood', '0');
-        //ob_clean();
-        //WP_Error
-        if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
-            $re = '/postid-(\d+)/m';
-            return preg_replace($re, "", $response['body']);
-        } else {
-            return false;
-        }
-    }
-
-    function generateStaticPageSingle($id = false)
-    {
+        $this->removeLinks($id);
         self::debug();
         $startTime = microtime(true);
         $die = false;
@@ -442,68 +444,117 @@ class AdminController extends adminViews
                 $slugStructure = str_replace(" ", "-", strtolower($slugStructure));
             }
 
-            //$index = get_post_meta($id, 'lastIndex', true);
-            $index = $this->countLinks($id);
-            //var_dump($index);
-            //exit;
-            if ($index === false) {
-                $index = 0;
-            } else {
-                // $index++;
-            }
-            //if (isset($_POST['lIndex'])) {
-            //$index = $_POST['lIndex'] + 1;
-            //}
+            $content = ['id' => $id];
+            for ($i = 0; $i < $limit; $i++) {
+                $index = $i;
+                if ($content) {
+                    $slug = $this->filterData($slugStructure, $index, $id);
+                    $slug = $this->slugFilter($slug);
+                    $content['slug'] = $slug;
 
-            update_post_meta($id, 'lastIndex', $index);
+                    $replacer = $this->filterDataMap($index, $id);
+                    $actualLink = $this->ActualLink($slug);
+                    $replacer['find'][] = $orgLink;
+                    $replacer['replace'][] = $actualLink;
+                    $content['replacer'] = $replacer;
 
-            $content = false;
-            if ($this->options['quick_mood'] != "1") {
-                $content = $this->getContentById($id);
-            } else {
-                $filename = __SPG_CONTENT . "temp/$id.html";
-                if (file_exists($filename)) {
-                    $content = file_get_contents($filename);
-                }
-            }
-
-
-            if ($content) {
-                $slug = $this->filterData($slugStructure, $index, $id);
-                $slug = $this->slugFilter($slug);
-
-                $content = $this->internalLinkFilter($content, $slug); //Slug for Skip
-
-                $content = $this->filterData($content, $index, $id);
-                $actualLink = $this->ActualLink($slug);
-                $content = str_replace($orgLink, $actualLink, $content);
-
-                if ($slug != "" && $content != "") {
-                    if ($this->writeFile($content, $slug)) {
-                        $this->addLink($id, $slug);
-                        $tTaken = microtime(true) - $startTime;
-                        echo json_encode([
-                            'error' => false,
-                            'lIndex' => $index,
-                            'link' => $actualLink,
-                            'time' => number_format($tTaken, 2),
-                        ]);
-                    } else {
-                        echo json_encode([
-                            'error' => true,
-                            'msg' => 'file write error',
-                            'lIndex' => ($index > 0 ? ($index - 1) : 0)
-                        ]);
+                    if ($slug != "" && $content != "") {
+                        if ($this->writeFile(json_encode($content), $slug)) {
+                            $this->addLink($id, $slug);
+                            $tTaken = microtime(true) - $startTime;
+                        }
                     }
                 }
-            } else {
-                echo json_encode(['error' => true, 'msg' => 'Page Content Missing']);
             }
         }
         if ($die) {
             wp_die();
         }
     }
+
+    // function generateStaticPageSingle($id = false)
+    // {
+    //     self::debug();
+    //     $startTime = microtime(true);
+    //     $die = false;
+    //     if (isset($_POST['id'])) {
+    //         $id = $_POST['id'];
+    //         $die = true;
+    //     }
+    //     if ($id) {
+    //         $orgLink = get_permalink($id);
+    //         $slugStructure = get_post_meta($id, 'slugStructure', true);
+    //         if (!empty($slugStructure)) {
+    //             $slugStructure = str_replace(" ", "-", strtolower($slugStructure));
+    //         }
+
+    //         //$index = get_post_meta($id, 'lastIndex', true);
+    //         $index = $this->countLinks($id);
+    //         //var_dump($index);
+    //         //exit;
+    //         if ($index === false) {
+    //             $index = 0;
+    //         } else {
+    //             // $index++;
+    //         }
+    //         //if (isset($_POST['lIndex'])) {
+    //         //$index = $_POST['lIndex'] + 1;
+    //         //}
+
+    //         update_post_meta($id, 'lastIndex', $index);
+
+    //         $content = ['id' => $id];
+    //         // if ($this->options['quick_mood'] != "1") {
+    //         //    $content = $this->getContentById($id);
+    //         // } else {
+    //         //     $filename = __SPG_CONTENT . "temp/$id.html";
+    //         //     if (file_exists($filename)) {
+    //         //         $content = file_get_contents($filename);
+    //         //     }
+    //         // }
+
+
+    //         if ($content) {
+    //             $slug = $this->filterData($slugStructure, $index, $id);
+    //             $slug = $this->slugFilter($slug);
+
+    //             //$content = $this->internalLinkFilter($content, $slug); //Slug for Skip
+    //             $content['slug'] = $slug;
+
+    //             $replacer = $this->filterDataMap($index, $id);
+
+    //             $actualLink = $this->ActualLink($slug);
+    //             //$content = str_replace($orgLink, $actualLink, $content);
+    //             $replacer['find'][] = $orgLink;
+    //             $replacer['replace'][] = $actualLink;
+    //             $content['replacer'] = $replacer;
+
+    //             if ($slug != "" && $content != "") {
+    //                 if ($this->writeFile(json_encode($content), $slug)) {
+    //                     $this->addLink($id, $slug);
+    //                     $tTaken = microtime(true) - $startTime;
+    //                     echo json_encode([
+    //                         'error' => false,
+    //                         'lIndex' => $index,
+    //                         'link' => $actualLink,
+    //                         'time' => number_format($tTaken, 2),
+    //                     ]);
+    //                 } else {
+    //                     echo json_encode([
+    //                         'error' => true,
+    //                         'msg' => 'file write error',
+    //                         'lIndex' => ($index > 0 ? ($index - 1) : 0)
+    //                     ]);
+    //                 }
+    //             }
+    //         } else {
+    //             echo json_encode(['error' => true, 'msg' => 'Page Content Missing']);
+    //         }
+    //     }
+    //     if ($die) {
+    //         wp_die();
+    //     }
+    // }
 
     function slugFilter($slug)
     {
@@ -530,7 +581,7 @@ class AdminController extends adminViews
                     $staticPage = __SPG_CONTENT . "pages/" . $slug;
                     if (file_exists($staticPage)) {
                         unlink($staticPage);
-                        $n++;
+                        // $n++;
                     }
                 }
             }
@@ -546,32 +597,32 @@ class AdminController extends adminViews
         fclose($file);
     }
 
-    function countLinks($id)
-    {
-        $filename = __SPG_CONTENT . "links/$id.txt";
-        if (file_exists($filename)) {
-            $lines = count(file($filename));
-            return $lines;
-        }
-        return 0;
-    }
+    // function countLinks($id)
+    // {
+    //     $filename = __SPG_CONTENT . "links/$id.txt";
+    //     if (file_exists($filename)) {
+    //         $lines = count(file($filename));
+    //         return $lines;
+    //     }
+    //     return 0;
+    // }
 
-    function regenerate()
-    {
-        if (isset($_POST['id'])) {
-            $id = $_POST['id'];
-            $filename = __SPG_CONTENT . "links/$id.txt";
-            $tempFile = __SPG_CONTENT . "temp/$id.html";
-            if (file_exists($tempFile)) {
-                unlink($tempFile);
-            }
-            if (file_exists($filename)) {
-                unlink($filename);
-            }
-            $this->generateStaticPage($id);
-        }
-        wp_die();
-    }
+    // function regenerate()
+    // {
+    //     if (isset($_POST['id'])) {
+    //         $id = $_POST['id'];
+    //         $filename = __SPG_CONTENT . "links/$id.txt";
+    //         $tempFile = __SPG_CONTENT . "temp/$id.html";
+    //         if (file_exists($tempFile)) {
+    //             unlink($tempFile);
+    //         }
+    //         if (file_exists($filename)) {
+    //             unlink($filename);
+    //         }
+    //         $this->generateStaticPage($id);
+    //     }
+    //     wp_die();
+    // }
 
     function deleteStaticPages()
     {
@@ -645,25 +696,6 @@ class AdminController extends adminViews
             return;
         }
         wp_die();
-        //
-        //        $dir = ABSPATH . "/" . $this->options['static_sitemap_directory'];
-        //        $parentFile = ABSPATH . "/" . $this->options['sitemapName'] . ".xml";
-        //        $htmlFile = ABSPATH . "/" . $this->options['sitemapName'] . ".html";
-        //        if (file_exists($htmlFile)) {
-        //            unlink($htmlFile);
-        //        }
-        //        if (file_exists($parentFile)) {
-        //            unlink($parentFile);
-        //        }
-        //        if (!empty($this->options['static_sitemap_directory'])) {
-        //            if (is_dir($dir)) {
-        //                //$this->rrmdir($dir);
-        //                echo " Delete Dir ";
-        //            }
-        //        } else {
-        //            echo "Root directory";
-        //        }
-        wp_die();
     }
 
     function rrmdir($src)
@@ -723,11 +755,25 @@ class AdminController extends adminViews
         return $link;
     }
 
+    function generateALLLink()
+    {
+        $args = array(
+            'post_type' => $this->options['postType'],
+            'fields' => 'ids'
+        );
+        $query = new \WP_Query($args);
+        foreach ($query->posts as $id) {
+            $total = get_post_meta($id, 'numberOfGenerate', true);
+            $this->generateStaticPageAll($id);
+        }
+    }
+
     function generateStaticSitemap()
     {
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
+        $this->generateALLLink(); //Generate All Link File before Generate Sitemap
 
         $this->deleteSitemaps(true); //Delete Existing generated Files
 
@@ -901,7 +947,7 @@ class AdminController extends adminViews
      * Replace or Filter String With Current Index of Keyword
      * @param type $str
      * @param type $index
-     * @return type
+     * @return String
      */
     function filterData($str = "", $index = 0, $postID = false)
     {
@@ -932,6 +978,35 @@ class AdminController extends adminViews
 
 
         return str_replace($cods, $replace, $str);
+    }
+
+    function filterDataMap($index = 0, $postID = false)
+    {
+        $data = $this->dataMap(false, $postID);
+        $cods = array_keys($data);
+        $cods = array_filter(array_map(function ($b) {
+            return '{' . $b . '}';
+        }, $cods));
+
+        $bigElement = $data;
+        //Short by Length
+        usort($bigElement, function ($a, $b) {
+            return count($b) - count($a);
+        });
+        $replace = [];
+        $bigElement = $bigElement[0];
+        if (!isset($bigElement[$index])) {
+            return $replace;
+        }
+
+        foreach ($data as $k => $valArr) {
+            if (isset($valArr[$index])) {
+                $replace[] = $valArr[$index];
+            } else {
+                $replace[] = "";
+            }
+        }
+        return ['find' => $cods, 'replace' => $replace];
     }
 
     /**

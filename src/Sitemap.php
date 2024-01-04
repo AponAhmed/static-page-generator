@@ -7,9 +7,11 @@ namespace Aponahmed\StaticPageGenerator;
  *
  * @author Mahabub
  */
-class Sitemap {
+class Sitemap
+{
 
     public $fileName = "static";
+    public $siteUrl;
     private $sitemapOption;
     private $options;
     public $tempData;
@@ -21,7 +23,8 @@ class Sitemap {
     public $sitemapFiles = [];
 
     //put your code here
-    public function __construct($options) {
+    public function __construct($options)
+    {
         $this->siteUrl = site_url();
         $this->options = $options;
         $this->fileName = $this->options['sitemapName'];
@@ -42,7 +45,8 @@ class Sitemap {
     /**
      * Get Options 
      */
-    function get_optionSitemap() {
+    function get_optionSitemap()
+    {
         $defaultOption = [
             'sitemap_max_links' => 1000,
             'post_types' => ['page'],
@@ -71,7 +75,8 @@ class Sitemap {
      * @param String $url
      * @return int 
      */
-    function getDepth($url) {
+    function getDepth($url)
+    {
         $RQURI = str_replace($this->siteUrl, "", $url);
         $parts = explode("/", $RQURI);
         $parts = array_unique(array_filter(array_map('trim', $parts)));
@@ -83,7 +88,8 @@ class Sitemap {
      * @param type $main
      * @return boolean
      */
-    public function generateXml($main = false) {
+    public function generateXml($main = false)
+    {
         $doc = new \DOMDocument('1.0', "UTF-8");
         $doc->formatOutput = true;
 
@@ -202,17 +208,19 @@ class Sitemap {
 
     /**
      * REmove Double Slash from URL
-     * @param type $url
-     * @return type
+     * @param String $url
+     * @return String
      */
-    function trimSlash($url) {
+    function trimSlash($url)
+    {
         return preg_replace('/([^:])(\/{2,})/', '$1/', $url);
     }
 
     /**
      * Html Sitemap Generate 
      */
-    function handleHtmlGenerate() {
+    function handleHtmlGenerate()
+    {
         $sidebarHtml = implode("\n", $this->HtmlSidebar); //Html Of Sidebar
 
         $bodyHtml = "";
@@ -229,7 +237,8 @@ class Sitemap {
         //Body Html
     }
 
-    function generateHtml($dataMap, $sidebarhtml) {
+    function generateHtml($dataMap, $sidebarhtml)
+    {
         $sidebarhtml = implode("\n", $sidebarhtml); //Html Of Sidebar
         $n = 0;
         foreach ($dataMap as $id => $singleItem) {
@@ -268,7 +277,8 @@ class Sitemap {
         }
     }
 
-    function generateHtmlFile($PageItemHtml = "", $fileName = "static", $sidebar = "") {
+    function generateHtmlFile($PageItemHtml = "", $fileName = "static", $sidebar = "")
+    {
         //print_r($doc);exit;
         //===============HTML==================
         $siteName = get_bloginfo();
@@ -361,5 +371,4 @@ body, head, #xsg {margin:0px 0px 0px 0px; line-height:22px; color:#666666; width
 </html>";
         $resHtml = file_put_contents(ABSPATH . "$fileName", $htmlData);
     }
-
 }
