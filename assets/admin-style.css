@@ -1,0 +1,484 @@
+
+/* 
+    Created on : Dec 19, 2022, 3:30:43 PM
+    Author     : Mahabub
+*/
+
+
+.key-tab-item {
+    display: none;
+}
+.key-tab-item.active {
+    display: block;
+}
+.input-wrap.custom-slug-input {
+    flex-direction: row;
+    align-items: center;
+}
+.input-wrap.custom-slug-input input[type="checkbox"] {
+    max-width: 20px !important;
+    min-width: initial;
+    margin-left: 15px;
+}
+.keyword-manage {
+    background: #fff;
+    border: 1px solid #ddd;
+    display: flex;
+    border-top: 0;
+}
+.keyword-manage .keyword-groups {
+    width: 250px;
+    border-right: 1px solid #ddd;
+}
+
+
+.CodeMirror {
+    height: 100%;
+}
+
+.newKey4Static,.uploadSvg {
+    display: flex;
+    align-items: center;
+    background: #f4f4f4;
+    margin: 15px;
+    border-radius: 5px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.csv-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: rgba(34, 113, 177,.2);
+    width: 0%;
+    pointer-events: none;
+}
+.newKey4Static svg, .uploadSvg svg {
+    width: 24px;
+    margin-right: 6px;
+}
+
+.keyword-keys,.csv-wrap {
+    flex-grow: 1;
+    width: 100%;
+    position: relative;
+}
+.keyGroupList li:first-child, .svgFileList li:first-child{
+    border-top: 1px solid #f2f2f2;
+}
+.keyGroupList li, .svgFileList li{
+    padding: 10px 15px;
+    border-bottom: 1px solid #f2f2f2;
+    margin: 0;
+    cursor: pointer;
+    line-height: 1;
+    position: relative;
+}
+.keyGroupList li.active, .svgFileList li.active {
+    background: #1d2327;
+    color: #fff;
+    position: relative;
+    border-right: 3px solid #ff4b4b;
+}
+.keyGroupList, .svgFileList {
+    margin: 0;
+}
+.keyword-keys textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 15px;
+    min-height: 500px
+}
+.keyword-keys textarea:focus {
+    border: none;
+    outline: none;
+}
+.csv-wrap .update-csvData {
+    display: none;
+}
+.update-keyData,.update-csvData {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+    border: 1px solid #a2df7f;
+    background: #d9ffc4;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    cursor: pointer;
+    color: #44712c;
+    z-index: 999999;
+}
+.removeList {
+    padding: 9px;
+    position: absolute;
+    right: 0;
+    top: 1px;
+    cursor: pointer;
+}
+
+.keywordSelector {
+    display: flex;
+    flex-direction: column;
+}
+
+.keywordSelector select {
+    width: 100%;
+}
+
+.generateWrap {
+    display: flex;
+    border: 1px solid #2271b1;
+    align-content: center;
+}
+.generateWrap button {
+    background: #2271b1;
+    border: 0;
+    color: #fff;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.generateWrap button span{
+    margin-right:5px;
+}
+.generateWrap input {
+    border: 0;
+    width: 100%;
+}
+.generateWrap input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#slugStructure {
+    width: 100%;
+    height: 28px;
+    max-height: 28px;
+    min-height: 28px;
+    font-size: 12px;
+    border-radius: 0;
+    margin-bottom: 10px;
+}
+
+/*Progress*/
+.spg-progress {
+    height: 20px;
+    background: #fff;
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+}
+.spg-progress.visible {
+    display: flex;
+}
+.spg-progress-bar {
+    position: absolute;
+    height: 100%;
+    background: #8ec5ff;
+}
+.spg-progress-bar {
+    position: absolute;
+    height: 100%;
+}
+.spg-progress-bar-striped {
+    background: #79ae61;
+}
+
+.replaceGenerate {
+    background: transparent;
+    border: none;
+    line-height: 1;
+    margin-top: 4px;
+    cursor: pointer;
+}
+.replaceGenerate span {
+    line-height: 1;
+    pointer-events: none;
+}
+/*Details*/
+.StaticGeneratingInfo {
+    display: flex;
+    position: fixed;
+    width: 80%;
+    height: 80%;
+    z-index: 99999;
+    background: #fff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    flex-direction: column;
+    padding: 21px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #9f9f9f;
+}
+.StaticGeneratingInfo .spg-progress {
+    margin-bottom: 6px;
+}
+.staticG-title {
+    display: flex;
+    justify-content: space-between;
+}
+.staticG-title h3 {
+    margin: 0;
+}
+.staticG-title span {
+    font-size: 26px;
+    line-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.countGenerate {
+    margin-bottom: 5px;
+}
+.Generatingdetails {
+    height: 100%;
+    overflow-y: auto;
+    background: #f7f7f7;
+    border-radius: 4px;
+    border: 1px solid #eaeaea;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.static-info-item {
+    border: 1px solid #ececec;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 2px;
+    background: #fdfdfd;
+    display: flex;
+    flex-direction: column;
+}
+
+/**CSV**/
+.csv-row-count {
+    font-size: 12px;
+    text-align: center;
+    display: block;
+    padding: 0 2px;
+    color: #aaa;
+}
+.svg-data table{
+    border-collapse: collapse;
+}
+.svg-data  table tr:first-child {
+    background: #2271b1;
+    color: #fff !important;
+    font-weight: 600;
+}
+.svg-data table tr td {
+    border: 1px solid #eee;
+    text-align: left;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dataPlaceHolder {
+    display: block;
+    width: 100%;
+    padding: 2px 5px;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.svg-data {
+    max-height: 500px;
+    overflow-y: auto;
+}
+.loading-data {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 25px;
+}
+.shortcodeToolbar {
+    position: fixed;
+    top: -62px;
+    display: flex;
+    z-index: 999999;
+    background: rgba(44, 169, 198, 0.1);
+    padding: 5px;
+    border: 1px solid #a3c9e8;
+    border-radius: 4px;
+    padding-right: 25px;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    box-shadow: 1px 2px 15px rgba(0, 0, 0, 0.1);
+}
+.availableCodes {
+    display: flex;
+    flex-wrap: wrap;
+}
+.code-tool {
+    border: 1px solid #d5d5d5;
+    background: #f4f4f4;
+    margin: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    line-height: 1;
+    padding-bottom: 6px;
+    cursor: pointer;
+}
+.removeTool {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 5px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/*List Controller*/
+.listControllerWprogress {
+    display: flex;
+}
+.listControllerWprogress .prog-wrap {
+    width: 80%;
+    margin-right: 10px;
+}
+.listControllerWprogress .spg-progress {
+    margin: 0;
+    height: 10px;
+    border: 1px solid #67ac59;
+}
+.listControllerWprogress .spg-progress .spg-progress-bar {
+    background: #ade3a2;
+}
+/*Switch*/
+.switch{
+    position: relative;
+    width: 40px;
+    height: 13px;
+    margin: 0px auto;
+}
+.switch input[type=checkbox]{
+    position: absolute;
+    -moz-opacity: 0;
+    -khtml-opacity: 0;
+    -webkit-opacity: 0;
+    opacity: 0;
+    -ms-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0);
+    filter: alpha(opacity=0);
+}
+.switch label,
+.switch label span{
+    position: absolute;
+    left: 2px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    transition-duration: .2s;
+}
+.switch label{
+    border-radius: 20px;
+    background-color: #ddd;
+    box-shadow: 0 0 2px rgba(0, 0, 0,.8) inset;
+}
+.switch label:before,
+.switch label:after{
+    position: absolute;
+    top: -1px;
+    width: 28px;
+    line-height: 15px;
+    color: #fff;
+    text-align: center;
+}
+.switch label span {
+    z-index: 1;
+    width: 20px;
+    height: 20px;
+    margin: -3px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 0 2px rgba(0,0,0,.5);
+}
+.switch label:before {
+    left: -4px;
+    font-size: 8px;
+    content: 'ON';
+}
+.switch label:after {
+    right: -3px;
+    font-size: 8px;
+    content: 'OFF';
+}
+.switch input:checked+label {
+    background-color: #00c73c;
+}
+.switch input:checked+label span {
+    transform: translateX(20px);
+}
+.actionControl {
+    display: flex;
+    align-items: center;
+}
+.actionControl button {
+    border: 0;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+}
+
+.actionControl a.preview-staticPage {
+    background: #f2ffef;
+    margin-right: 8px;
+    border-radius: 4px;
+    padding: 2px 8px;
+    border: 1px solid #7fce83;
+}
+.generateNow {
+    background: transparent;
+    border: 1px solid #7fce83;
+    margin-top: 4px;
+    margin-left: 5px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+.ingo-generate {
+    display: flex;
+    align-items: center;
+}
+/*Settings*/
+.d-flex {
+    display: flex;
+    align-items: center;
+}
+.flex-col {
+    margin: 0 5px;
+}
+.flex-col.max-w80 {
+    max-width: 80px;
+}
+
+.flex-col input {
+    width: 100%;
+}
+.quickLinkInfo {
+    width: 100%;
+    margin-bottom: 10px;
+}
+.button.button-default.btnGenerateQuickLink {
+    margin-top: 10px;
+}
