@@ -14,7 +14,7 @@ class Generator
 {
 
     private $frontEnd;
-    private $backEnd;
+    private  AdminController $backEnd;
     private $options;
 
     public function __construct()
@@ -28,7 +28,7 @@ class Generator
         $this->initFiles();
         $this->getOptions();
         //Scheduler Event set
-        //$this->SetScheduler();
+        $this->SetScheduler();
         $this->initDir();
         add_action('init', [$this, 'static_post_generator'], 0);
         add_action('init', [$this, 'rewrite_set_preview'], 0);
@@ -53,7 +53,7 @@ class Generator
         add_action('wp_ajax_StoreKeywords', [$this->backEnd, 'StoreKeywords']);
         add_action('wp_ajax_removeList', [$this->backEnd, 'removeList']);
         add_action('wp_ajax_generateStaticPage', [$this->backEnd, 'generateStaticPage']);
-        //add_action('wp_ajax_generateStaticPageSingle', [$this->backEnd, 'generateStaticPageSingle']);
+        add_action('wp_ajax_generateStaticPageSingle', [$this->backEnd, 'generateStaticPageSingle']);
         add_action('wp_ajax_staticPageOptionsStore', [$this->backEnd, 'staticPageOptionsStore']);
         add_action('wp_ajax_generateStaticSitemap', [$this->backEnd, 'generateStaticSitemap']);
         add_action('wp_ajax_deleteStaticPages', [$this->backEnd, 'deleteStaticPages']);
@@ -62,63 +62,63 @@ class Generator
         add_action('wp_ajax_loadCsv', [$this->backEnd, 'loadCsv']);
         add_action('wp_ajax_removeCsv', [$this->backEnd, 'removeCsv']);
         add_action('wp_ajax_updateCsvFile', [$this->backEnd, 'updateCsvFile']);
-        //add_action('wp_ajax_changeStaticCronStatus', [$this->backEnd, 'changeStaticCronStatus']);
+        add_action('wp_ajax_changeStaticCronStatus', [$this->backEnd, 'changeStaticCronStatus']);
         add_action('wp_ajax_deleteSitemaps', [$this->backEnd, 'deleteSitemaps']);
-        // add_action('wp_ajax_manualGenerateStatus', [$this->backEnd, 'manualGenerateStatus']);
-        // add_action('wp_ajax_setStaticManualGenerateEvent', [$this->backEnd, 'setStaticManualGenerateEvent']);
+        add_action('wp_ajax_manualGenerateStatus', [$this->backEnd, 'manualGenerateStatus']);
+        add_action('wp_ajax_setStaticManualGenerateEvent', [$this->backEnd, 'setStaticManualGenerateEvent']);
         // add_action('wp_ajax_quickLinkGenerate', [$this->backEnd, 'quickLinkGenerate']);
     }
 
-    // function SetScheduler()
-    // {
-    //     add_filter('cron_schedules', array($this, 'cron_time_intervals'));
-    //     add_action('wp', array($this, 'cron_scheduler'));
-    //     add_action('cast_my_spell', array($this, 'every_three_minutes_event_func'));
-    // }
+    function SetScheduler()
+    {
+        add_filter('cron_schedules', array($this, 'cron_time_intervals'));
+        add_action('wp', array($this, 'cron_scheduler'));
+        add_action('cast_my_spell', array($this, 'every_three_minutes_event_func'));
+    }
 
-    // public function cron_time_intervals($schedules)
-    // {
-    //     $schedules['minutes_10'] = array(
-    //         'interval' => intval($this->options['cronInterval']),
-    //         'display' => 'Once 10 minutes'
-    //     );
-    //     return $schedules;
-    // }
+    public function cron_time_intervals($schedules)
+    {
+        $schedules['minutes_10'] = array(
+            'interval' => intval($this->options['cronInterval']),
+            'display' => 'Once 10 minutes'
+        );
+        return $schedules;
+    }
 
-    // function cron_scheduler()
-    // {
-    //     if (!wp_next_scheduled('cast_my_spell')) {
-    //         wp_schedule_event(time(), 'minutes_10', 'cast_my_spell');
-    //     }
-    // }
+    function cron_scheduler()
+    {
+        if (!wp_next_scheduled('cast_my_spell')) {
+            wp_schedule_event(time(), 'minutes_10', 'cast_my_spell');
+        }
+    }
 
-    // function every_three_minutes_event_func()
-    // {
-    //     // do something
-    //     $this->backEnd = new AdminController($this->options);
-    //     $args = array(
-    //         'post_type' => $this->options['postType'],
-    //         'fields' => 'ids',
-    //         'meta_query' => array(
-    //             array(
-    //                 'key' => 'cronStatus',
-    //                 'value' => '1',
-    //                 'compare' => '='
-    //             ),
-    //         )
-    //     );
-    //     $query = new \WP_Query($args);
-    //     //var_dump($query);
-    //     foreach ($query->posts as $id) {
-    //         //var_dump($id);
-    //         $total = get_post_meta($id, 'numberOfGenerate', true);
-    //         $generated = $this->backEnd->countLinks($id);
-    //         if ($generated < $total) { //Not Complete 
-    //             $this->backEnd->generateStaticPageSingle($id);
-    //         }
-    //     }
-    //     //echo "This is raned From Cron";
-    // }
+    function every_three_minutes_event_func()
+    {
+        // do something
+        $this->backEnd = new AdminController($this->options);
+        $args = array(
+            'post_type' => $this->options['postType'],
+            'fields' => 'ids',
+            'meta_query' => array(
+                array(
+                    'key' => 'cronStatus',
+                    'value' => '1',
+                    'compare' => '='
+                ),
+            )
+        );
+        $query = new \WP_Query($args);
+        //var_dump($query);
+        foreach ($query->posts as $id) {
+            //var_dump($id);
+            $total = get_post_meta($id, 'numberOfGenerate', true);
+            $generated = $this->backEnd->countLinks($id);
+            if ($generated < $total) { //Not Complete 
+                $this->backEnd->generateStaticPageSingle($id, $total, $generated);
+            }
+        }
+        //echo "This is raned From Cron";
+    }
 
     public static function init()
     {

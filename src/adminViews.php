@@ -14,39 +14,35 @@ class adminViews
     {
         switch ($column) {
             case 'progress_of_generate':
-                // $total = get_post_meta($post_id, 'numberOfGenerate', true);
-                // $cron = get_post_meta($post_id, 'cronStatus', true);
-                // $generated = $this->countLinks($post_id);
-                // $perc = 0;
-                // if ($total > 0 && $generated > 0) {
-                //     $perc = (100 / $total) * $generated;
-                // }
-                // $manualStatus = get_post_meta($post_id, 'static_manualGenerate', true);
+                $total = get_post_meta($post_id, 'numberOfGenerate', true);
+                $cron = get_post_meta($post_id, 'cronStatus', true);
+                $generated = $this->countLinks($post_id);
+                $perc = 0;
+                if ($total > 0 && $generated > 0) {
+                    $perc = (100 / $total) * $generated;
+                }
+                $manualStatus = get_post_meta($post_id, 'static_manualGenerate', true);
 ?>
                 <div class="listControllerWprogress" data-id='<?php echo $post_id ?>'>
-                    <!-- <div class="prog-wrap" id="prog<?php //echo $post_id 
-                                                        ?>">
+                    <div class="prog-wrap" id="prog<?php echo $post_id  ?>">
                         <div class="spg-progress visible">
-                            <div class="spg-progress-bar" style="width: <?php //echo $perc 
-                                                                        ?>%;"></div>
+                            <div class="spg-progress-bar" style="width: <?php echo $perc ?>%;"></div>
                         </div>
                         <div class="ingo-generate">
-                            <label>Generated : <span class="done-generate"><?php //echo $generated 
-                                                                            ?> </span> of <span class="total-page"><?php //echo $total 
-                                                                                                                    ?></span></label>
-                            <button type="button" class="generateNow"><?php //echo $manualStatus == '1' ? "Stop" : "Manual Generate" 
-                                                                        ?></button>
+                            <label>Generated : <span class="done-generate"><?php echo $generated ?> </span> of <span class="total-page"><?php echo $total ?></span></label>
+                            <button type="button" class="generateNow"><?php echo $manualStatus == '1' ? "Stop" : "Manual Generate" ?></button>
                             <button type="button" class="replaceGenerate"><span class="dashicons dashicons-update"></span></button>
                         </div>
-                    </div> -->
+                    </div>
                     <div class="actionControl">
                         <a target="_blank" href="<?php echo site_url() ?>/preview-static/<?php echo $post_id ?>/" class="preview-staticPage" onclick='previewStaticPage(this)'>Preview</a>
-                        <!-- <div class="switch" title="Generate By Cron Job">
-                            <input class="cronEnable" type="checkbox" <?php //echo $cron == '1' ? 'checked' : '' ?> onchange="changeStaticCronStatus(this)" data-id="<?php echo $post_id ?>" id="c<?php echo $post_id ?>">
+                        <div class="switch" title="Generate By Cron Job">
+                            <input class="cronEnable" type="checkbox" <?php echo $cron == '1' ? 'checked' : ''
+                                                                        ?> onchange="changeStaticCronStatus(this)" data-id="<?php echo $post_id ?>" id="c<?php echo $post_id ?>">
                             <label for="c<?php echo $post_id ?>"><span></span></label>
                         </div>
                         <button title="Clean Generated Resources" type="button" onclick="deleteStaticPages(<?php echo $post_id ?>, this)"><span class="dashicons dashicons-trash"></span></button>
-                    -->
+
                     </div>
                 </div>
         <?php
@@ -95,10 +91,10 @@ class adminViews
         <label>Permalink</label>
         <input type="text" id="slugStructure" name="slugStructure" value="<?php echo $slugStructure ?>" placeholder="Slug Structure" />
         <div class="generateWrap">
-            <!-- <button type="button" id="generateBtn" onclick="GenerateStaticPage(<?php echo $post->ID; ?>, this)">Generate</button> -->
+            <button type="button" id="generateBtn" onclick="GenerateStaticPage(<?php echo $post->ID; ?>, this)">Generate</button>
             <input type="number" min="1" name="numberOfGenerate" id="numberOfGenerate" value="<?php echo $genCount ? $genCount : $countData ?>" />
-            <!-- <button type="button" onclick="deleteStaticPages(<?php echo $post->ID; ?>, this)"><span class="dashicons dashicons-trash"></span></button> -->
-        </div><!-- comment -->
+            <button type="button" onclick="deleteStaticPages(<?php echo $post->ID; ?>, this)"><span class="dashicons dashicons-trash"></span></button>
+        </div>
         <div class="spg-progress">
             <div class="spg-progress-bar progDetails"></div>
         </div>

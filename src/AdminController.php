@@ -141,79 +141,79 @@ class AdminController extends adminViews
         );
     }
 
-    // function setStaticManualGenerateEvent()
-    // {
-    //     $args = array(
-    //         'post_type' => $this->options['postType'],
-    //         'fields' => 'ids',
-    //         'meta_query' => array(
-    //             array(
-    //                 'key' => 'static_manualGenerate',
-    //                 'value' => '1',
-    //                 'compare' => '='
-    //             ),
-    //         )
-    //     );
-    //     $query = new \WP_Query($args);
-    //     $info = [];
-    //     if ($query->post_count > 0) {
-    //         foreach ($query->posts as $id) {
-    //             $total = get_post_meta($id, 'numberOfGenerate', true);
-    //             $generated = $this->countLinks($id);
-    //             if ($generated < $total) { //Not Complete 
-    //                 ob_start();
-    //                 $this->generateStaticPageSingle($id);
-    //                 $resp = ob_get_clean();
-    //                 $respArr = json_decode($resp, true);
-    //                 if (isset($respArr['lIndex'])) {
-    //                     $info[] = ['id' => $id, 'done' => $respArr['lIndex'], 'total' => $total];
-    //                 }
-    //             } else {
-    //                 $info[] = ['id' => $id, 'done' => $total, 'total' => $total];
-    //             }
-    //         }
-    //     }
-    //     echo json_encode($info);
-    //     wp_die();
-    // }
+    function setStaticManualGenerateEvent()
+    {
+        $args = array(
+            'post_type' => $this->options['postType'],
+            'fields' => 'ids',
+            'meta_query' => array(
+                array(
+                    'key' => 'static_manualGenerate',
+                    'value' => '1',
+                    'compare' => '='
+                ),
+            )
+        );
+        $query = new \WP_Query($args);
+        $info = [];
+        if ($query->post_count > 0) {
+            foreach ($query->posts as $id) {
+                $total = get_post_meta($id, 'numberOfGenerate', true);
+                $generated = $this->countLinks($id);
+                if ($generated < $total) { //Not Complete 
+                    ob_start();
+                    $this->generateStaticPageSingle($id);
+                    $resp = ob_get_clean();
+                    $respArr = json_decode($resp, true);
+                    if (isset($respArr['lIndex'])) {
+                        $info[] = ['id' => $id, 'done' => $respArr['lIndex'], 'total' => $total];
+                    }
+                } else {
+                    $info[] = ['id' => $id, 'done' => $total, 'total' => $total];
+                }
+            }
+        }
+        echo json_encode($info);
+        wp_die();
+    }
 
-    // function manualGenerateStatus()
-    // {
-    //     if (isset($_POST['postID']) && !empty($_POST['postID'])) {
-    //         $id = $_POST['postID'];
-    //         $currentStatus = get_post_meta($id, 'static_manualGenerate', true);
-    //         if ($currentStatus === false) {
-    //             $currentStatus = "0";
-    //         }
+    function manualGenerateStatus()
+    {
+        if (isset($_POST['postID']) && !empty($_POST['postID'])) {
+            $id = $_POST['postID'];
+            $currentStatus = get_post_meta($id, 'static_manualGenerate', true);
+            if ($currentStatus === false) {
+                $currentStatus = "0";
+            }
 
-    //         if ($currentStatus == '0') {
-    //             $currentStatus = '1';
-    //             update_post_meta($id, 'cronStatus', '0'); //Disable from Cron When Manual Generate 
-    //             $this->generateStaticPage($id);
-    //         } else {
-    //             $currentStatus = '0';
-    //         }
-    //         update_post_meta($id, 'static_manualGenerate', $currentStatus);
-    //         ob_get_clean();
+            if ($currentStatus == '0') {
+                $currentStatus = '1';
+                update_post_meta($id, 'cronStatus', '0'); //Disable from Cron When Manual Generate 
+                //$this->generateStaticPage($id);
+            } else {
+                $currentStatus = '0';
+            }
+            update_post_meta($id, 'static_manualGenerate', $currentStatus);
+            ob_get_clean();
 
-    //         echo $currentStatus;
-    //     }
-    //     wp_die();
-    // }
+            echo $currentStatus;
+        }
+        wp_die();
+    }
 
-    // function changeStaticCronStatus()
-    // {
-    //     if (isset($_POST['postID']) && !empty($_POST['postID']) && isset($_POST['status']) && !empty($_POST['status'])) {
-    //         $st = '0';
-    //         $id = $_POST['postID'];
-    //         if ($_POST['status'] == 'true') {
-    //             $st = '1';
-    //             $this->generateStaticPage($id);
-    //         }
-    //         update_post_meta($id, 'cronStatus', $st);
-    //     }
-    //     wp_die();
-    // }
+    function changeStaticCronStatus()
+    {
+        if (isset($_POST['postID']) && !empty($_POST['postID']) && isset($_POST['status']) && !empty($_POST['status'])) {
+            $st = '0';
+            $id = $_POST['postID'];
+            if ($_POST['status'] == 'true') {
+                $st = '1';
+                //$this->generateStaticPage($id);
+            }
+            update_post_meta($id, 'cronStatus', $st);
+        }
+        wp_die();
+    }
 
     function keyFiles($dir = false)
     {
@@ -365,67 +365,74 @@ class AdminController extends adminViews
     /**
      * Ajax Request for curl data of page and store temp with page id
      */
-    // function generateStaticPage($id = false)
-    // {
-    //     update_option('staticGmood', '1');
-    //     $die = false;
-    //     if (isset($_POST['id']) && !empty($_POST['id'])) {
-    //         $id = $_POST['id'];
-    //         $die = true;
-    //     }
-    //     if ($id) {
-    //         //Limit of Generated
-    //         if (isset($_POST['limit'])) {
-    //             update_post_meta($id, 'numberOfGenerate', trim($_POST['limit']));
-    //         }
-    //         $link = get_permalink($id);
-    //         $http = new \WP_Http();
-    //         $response = @$http->request($link, ['timeout' => 120]);
+    function generateStaticPage($id = false)
+    {
+        update_option('staticGmood', '1');
+        $die = false;
+        if (isset($_POST['id']) && !empty($_POST['id'])) {
+            $id = $_POST['id'];
+            $die = true;
+        }
+        if ($id) {
+            update_option('staticGmood', '0');
+            echo json_encode(['error' => false, 'id' => $id]);
+            if ($die) {
+                wp_die();
+            }
 
-    //         if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
-    //             $fileName = __SPG_CONTENT . "temp/$id.html";
-    //             //existing File of Links by ID
-    //             //$linksFile = __SPG_CONTENT . "links/$id.txt";
-    //             //if (file_exists($linksFile)) {
-    //             // unlink($linksFile);
-    //             // }
-    //             if (file_put_contents($fileName, $response['body'])) {
-    //                 echo json_encode(['error' => false, 'id' => $id]);
-    //             } else {
-    //                 echo json_encode(['error' => true, 'msg' => "Page content couldn't Stored"]);
-    //             }
-    //         } else {
-    //             //error
-    //             echo json_encode(['error' => true, 'msg' => 'Page content Retrive Error:' . $response['response']['code']]);
-    //         }
-    //     }
-    //     update_option('staticGmood', '0');
-    //     if ($die) {
-    //         wp_die();
-    //     }
-    // }
+            //Limit of Generated
+            if (isset($_POST['limit'])) {
+                update_post_meta($id, 'numberOfGenerate', trim($_POST['limit']));
+            }
 
-    // public function getContentById($id)
-    // {
-    //     //return ['id' => $id];
-    //     //ob_start();
-    //     error_reporting(0);
-    //     update_option('staticGmood', '1');
+            $link = get_permalink($id);
+            $http = new \WP_Http();
+            $response = @$http->request($link, ['timeout' => 120]);
 
-    //     $link = get_permalink($id);
-    //     $http = new \WP_Http();
-    //     $response = @$http->request($link, ['timeout' => 120]);
+            if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
+                $fileName = __SPG_CONTENT . "temp/$id.html";
+                //existing File of Links by ID
+                //$linksFile = __SPG_CONTENT . "links/$id.txt";
+                //if (file_exists($linksFile)) {
+                // unlink($linksFile);
+                // }
+                if (file_put_contents($fileName, $response['body'])) {
+                    echo json_encode(['error' => false, 'id' => $id]);
+                } else {
+                    echo json_encode(['error' => true, 'msg' => "Page content couldn't Stored"]);
+                }
+            } else {
+                //error
+                echo json_encode(['error' => true, 'msg' => 'Page content Retrive Error:' . $response['response']['code']]);
+            }
+        }
+        update_option('staticGmood', '0');
+        if ($die) {
+            wp_die();
+        }
+    }
 
-    //     update_option('staticGmood', '0');
-    //     //ob_clean();
-    //     //WP_Error
-    //     if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
-    //         $re = '/postid-(\d+)/m';
-    //         return preg_replace($re, "", $response['body']);
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    public function getContentById($id)
+    {
+        //return ['id' => $id];
+        //ob_start();
+        error_reporting(0);
+        update_option('staticGmood', '1');
+
+        $link = get_permalink($id);
+        $http = new \WP_Http();
+        $response = @$http->request($link, ['timeout' => 120]);
+
+        update_option('staticGmood', '0');
+        //ob_clean();
+        //WP_Error
+        if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
+            $re = '/postid-(\d+)/m';
+            return preg_replace($re, "", $response['body']);
+        } else {
+            return false;
+        }
+    }
 
     function generateStaticPageAll($id = false, $limit = 200)
     {
@@ -445,6 +452,8 @@ class AdminController extends adminViews
             }
 
             $content = ['id' => $id];
+            $linkStr = "";
+            $n = 0;
             for ($i = 0; $i < $limit; $i++) {
                 $index = $i;
                 if ($content) {
@@ -460,101 +469,103 @@ class AdminController extends adminViews
 
                     if ($slug != "" && $content != "") {
                         if ($this->writeFile(json_encode($content), $slug)) {
-                            $this->addLink($id, $slug);
-                            $tTaken = microtime(true) - $startTime;
+                            $n++;
+                            $linkStr .= $slug . "\n";
+                            if ($n > 500) { //update file after Every 500 link
+                                $linkStr = "";
+                                $n = 0;
+                                $this->addLink($id, $linkStr);
+                            }
+                            //$tTaken = microtime(true) - $startTime;
                         }
                     }
                 }
             }
+            $this->addLink($id, $linkStr);
         }
         if ($die) {
             wp_die();
         }
     }
 
-    // function generateStaticPageSingle($id = false)
-    // {
-    //     self::debug();
-    //     $startTime = microtime(true);
-    //     $die = false;
-    //     if (isset($_POST['id'])) {
-    //         $id = $_POST['id'];
-    //         $die = true;
-    //     }
-    //     if ($id) {
-    //         $orgLink = get_permalink($id);
-    //         $slugStructure = get_post_meta($id, 'slugStructure', true);
-    //         if (!empty($slugStructure)) {
-    //             $slugStructure = str_replace(" ", "-", strtolower($slugStructure));
-    //         }
+    function generateStaticPageSingle($id = false)
+    {
+        $atATime = 17;
+        self::debug();
+        $startTime = microtime(true);
+        $die = false;
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
+            $die = true;
+        }
+        $total = get_post_meta($id, 'numberOfGenerate', true);
+        $generated = $this->countLinks($id);
 
-    //         //$index = get_post_meta($id, 'lastIndex', true);
-    //         $index = $this->countLinks($id);
-    //         //var_dump($index);
-    //         //exit;
-    //         if ($index === false) {
-    //             $index = 0;
-    //         } else {
-    //             // $index++;
-    //         }
-    //         //if (isset($_POST['lIndex'])) {
-    //         //$index = $_POST['lIndex'] + 1;
-    //         //}
+        if ($id) {
+            $orgLink = get_permalink($id);
+            $slugStructure = get_post_meta($id, 'slugStructure', true);
+            if (!empty($slugStructure)) {
+                $slugStructure = str_replace(" ", "-", strtolower($slugStructure));
+            }
 
-    //         update_post_meta($id, 'lastIndex', $index);
-
-    //         $content = ['id' => $id];
-    //         // if ($this->options['quick_mood'] != "1") {
-    //         //    $content = $this->getContentById($id);
-    //         // } else {
-    //         //     $filename = __SPG_CONTENT . "temp/$id.html";
-    //         //     if (file_exists($filename)) {
-    //         //         $content = file_get_contents($filename);
-    //         //     }
-    //         // }
+            //$index = get_post_meta($id, 'lastIndex', true);
+            $index = $this->countLinks($id);
+            //var_dump($index);
+            //exit;
+            if ($index === false) {
+                $index = 0;
+            }
 
 
-    //         if ($content) {
-    //             $slug = $this->filterData($slugStructure, $index, $id);
-    //             $slug = $this->slugFilter($slug);
+            $content = ['id' => $id];
+            $info = [];
+            for ($i = 0; $i < $atATime; $i++) {
+                if ($generated >= $total)
+                    break;
+                $generated++;
 
-    //             //$content = $this->internalLinkFilter($content, $slug); //Slug for Skip
-    //             $content['slug'] = $slug;
+                if ($content) {
+                    $slug = $this->filterData($slugStructure, $index, $id);
+                    $slug = $this->slugFilter($slug);
 
-    //             $replacer = $this->filterDataMap($index, $id);
+                    //$content = $this->internalLinkFilter($content, $slug); //Slug for Skip
+                    $content['slug'] = $slug;
 
-    //             $actualLink = $this->ActualLink($slug);
-    //             //$content = str_replace($orgLink, $actualLink, $content);
-    //             $replacer['find'][] = $orgLink;
-    //             $replacer['replace'][] = $actualLink;
-    //             $content['replacer'] = $replacer;
+                    $replacer = $this->filterDataMap($index, $id);
 
-    //             if ($slug != "" && $content != "") {
-    //                 if ($this->writeFile(json_encode($content), $slug)) {
-    //                     $this->addLink($id, $slug);
-    //                     $tTaken = microtime(true) - $startTime;
-    //                     echo json_encode([
-    //                         'error' => false,
-    //                         'lIndex' => $index,
-    //                         'link' => $actualLink,
-    //                         'time' => number_format($tTaken, 2),
-    //                     ]);
-    //                 } else {
-    //                     echo json_encode([
-    //                         'error' => true,
-    //                         'msg' => 'file write error',
-    //                         'lIndex' => ($index > 0 ? ($index - 1) : 0)
-    //                     ]);
-    //                 }
-    //             }
-    //         } else {
-    //             echo json_encode(['error' => true, 'msg' => 'Page Content Missing']);
-    //         }
-    //     }
-    //     if ($die) {
-    //         wp_die();
-    //     }
-    // }
+                    $actualLink = $this->ActualLink($slug);
+                    //$content = str_replace($orgLink, $actualLink, $content);
+                    $replacer['find'][] = $orgLink;
+                    $replacer['replace'][] = $actualLink;
+                    $content['replacer'] = $replacer;
+
+                    if ($slug != "" && $content != "") {
+                        if ($this->writeFile(json_encode($content), $slug)) {
+                            $this->addLink($id, $slug);
+                            $info['error'] = false;
+                            $info['links'][] = $actualLink;
+                            $info['lIndex'] = $index;
+                        } else {
+                            $info['error'] = true;
+                            $info['lIndex'] = ($index > 0 ? ($index - 1) : 0);
+                        }
+                    }
+                } else {
+                    $info = ['error' => true, 'msg' => 'Page Content Missing'];
+                }
+                $index += 1;
+            }
+        }
+        update_post_meta($id, 'lastIndex', $index);
+
+        $tTaken = microtime(true) - $startTime;
+        $info['time'] = number_format($tTaken, 2);
+
+        echo json_encode($info);
+        if ($die) {
+            wp_die();
+        }
+    }
 
     function slugFilter($slug)
     {
@@ -597,32 +608,32 @@ class AdminController extends adminViews
         fclose($file);
     }
 
-    // function countLinks($id)
-    // {
-    //     $filename = __SPG_CONTENT . "links/$id.txt";
-    //     if (file_exists($filename)) {
-    //         $lines = count(file($filename));
-    //         return $lines;
-    //     }
-    //     return 0;
-    // }
+    function countLinks($id)
+    {
+        $filename = __SPG_CONTENT . "links/$id.txt";
+        if (file_exists($filename)) {
+            $lines = count(file($filename));
+            return $lines;
+        }
+        return 0;
+    }
 
-    // function regenerate()
-    // {
-    //     if (isset($_POST['id'])) {
-    //         $id = $_POST['id'];
-    //         $filename = __SPG_CONTENT . "links/$id.txt";
-    //         $tempFile = __SPG_CONTENT . "temp/$id.html";
-    //         if (file_exists($tempFile)) {
-    //             unlink($tempFile);
-    //         }
-    //         if (file_exists($filename)) {
-    //             unlink($filename);
-    //         }
-    //         $this->generateStaticPage($id);
-    //     }
-    //     wp_die();
-    // }
+    function regenerate()
+    {
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
+            $filename = __SPG_CONTENT . "links/$id.txt";
+            $tempFile = __SPG_CONTENT . "temp/$id.html";
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+            if (file_exists($filename)) {
+                unlink($filename);
+            }
+            //$this->generateStaticPage($id);
+        }
+        wp_die();
+    }
 
     function deleteStaticPages()
     {
@@ -764,7 +775,7 @@ class AdminController extends adminViews
         $query = new \WP_Query($args);
         foreach ($query->posts as $id) {
             $total = get_post_meta($id, 'numberOfGenerate', true);
-            $this->generateStaticPageAll($id);
+            $this->generateStaticPageAll($id, $total);
         }
     }
 
@@ -773,8 +784,7 @@ class AdminController extends adminViews
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
-        $this->generateALLLink(); //Generate All Link File before Generate Sitemap
-
+        //$this->generateALLLink(); //Generate All Link File before Generate Sitemap
         $this->deleteSitemaps(true); //Delete Existing generated Files
 
         $dir = __SPG_CONTENT . "links/";
@@ -964,7 +974,7 @@ class AdminController extends adminViews
         });
         $bigElement = $bigElement[0];
         if (!isset($bigElement[$index])) {
-            return $str;
+            return "";
         }
 
         $replace = [];

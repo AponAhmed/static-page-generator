@@ -133,66 +133,69 @@ async function deleteStaticPages(id, _this) {
 }
 
 
-// async function GenerateStaticPage(id, _this) {
-//     jQuery(_this).html("<span class='dashicons dashicons-update loading'></span> Processing");
-//     limit = jQuery("#numberOfGenerate").val();
-//     await jQuery.post(ajaxurl, { action: 'generateStaticPage', id: id, limit: limit }, (response) => {
-//         response = JSON.parse(response);
-//         if (response.error) {
-//             console.log(response.msg);
-//         } else {
-//             PostID = response.id;
-//             jQuery('body').append(`
-// <div class="StaticGeneratingInfo">
-//     <div class='staticG-title'>
-//         <h3>Generating</h3>
-//         <span onclick="removeStaticGenerating()">&times;</span>
-//     </div>
-//     <div class="spg-progress">
-//         <div class="spg-progress-bar"></div>
-//     </div>
-//     <div class="countGenerate">Generated: <span class='gDone'>${done}</span> of <span class='gTotal'>${limit}</span></div>
-//     <div class="Generatingdetails"></div>
-// </div>`);
-//             jQuery(".spg-progress").addClass('visible');
-//             intval = setInterval(generateSingle, 100);
-//             jQuery(_this).html("<span class='dashicons dashicons-update loading'></span> Generating")
-//         }
-//     })
-// }
+async function GenerateStaticPage(id, _this) {
+    jQuery(_this).html("<span class='dashicons dashicons-update loading'></span> Processing");
+    limit = jQuery("#numberOfGenerate").val();
+    await jQuery.post(ajaxurl, { action: 'generateStaticPage', id: id, limit: limit }, (response) => {
+        response = JSON.parse(response);
+        if (response.error) {
+            console.log(response.msg);
+        } else {
+            PostID = response.id;
+            jQuery('body').append(`
+<div class="StaticGeneratingInfo">
+    <div class='staticG-title'>
+        <h3>Generating</h3>
+        <span onclick="removeStaticGenerating()">&times;</span>
+    </div>
+    <div class="spg-progress">
+        <div class="spg-progress-bar"></div>
+    </div>
+    <div class="countGenerate">Generated: <span class='gDone'>${done}</span> of <span class='gTotal'>${limit}</span></div>
+    <div class="Generatingdetails"></div>
+</div>`);
+            jQuery(".spg-progress").addClass('visible');
+            intval = setInterval(generateSingle, 100);
+            jQuery(_this).html("<span class='dashicons dashicons-update loading'></span> Generating")
+        }
+    })
+}
 
 
 
-// async function generateSingle() {
-//     stTime = new Date().getTime();
-//     //console.log(PostID, lIndex);
-//     if (!generating) {
-//         generating = true;
-//         await jQuery.post(ajaxurl, { action: 'generateStaticPageSingle', id: PostID, lIndex: lIndex }, (response) => {
-//             response = JSON.parse(response);
-//             if (!response.error) {
-//                 done = (response.lIndex + 1);
-//                 let prog = ((100 / limit) * done).toFixed(2);
-//                 jQuery(".spg-progress-bar").css('width', prog + "%");
-//                 jQuery(".gDone").html(done);
-//                 generating = false;
-//                 let newTime = new Date().getTime();
-//                 let timeCons = newTime - stTime;
-//                 stTime = newTime;
+async function generateSingle() {
+    stTime = new Date().getTime();
+    //console.log(PostID, lIndex);
+    if (!generating) {
+        generating = true;
+        await jQuery.post(ajaxurl, { action: 'generateStaticPageSingle', id: PostID, lIndex: lIndex }, (response) => {
+            response = JSON.parse(response);
+            if (!response.error) {
+                done = (response.lIndex + 1);
+                let prog = ((100 / limit) * done).toFixed(2);
+                jQuery(".spg-progress-bar").css('width', prog + "%");
+                jQuery(".gDone").html(done);
+                generating = false;
+                let newTime = new Date().getTime();
+                let timeCons = newTime - stTime;
+                stTime = newTime;
 
-//                 jQuery(".Generatingdetails").prepend(`<div class='static-info-item'><label>link <a target='_blank' href='${response.link}'>${response.link}</a></label><label>Time Taken:${timeCons.toFixed(2)}ms</label></div>`);
-//                 if (prog >= 100) {
-//                     clearInterval(intval);
-//                     jQuery("#generateBtn").html("Complete");
-//                 } else {
-//                     lIndex = response.lIndex;
-//                 }
-//             } else {
-//                 console.log(response.msg);
-//             }
-//         });
-//     }
-// }
+                response.links.forEach(lnk => {
+                    jQuery(".Generatingdetails").prepend(`<div class='static-info-item'><label>link <a target='_blank' href='${lnk}'>${lnk}</a></label><label>Time Taken:${(timeCons / response.links.length).toFixed(2)}ms</label></div>`);
+                });
+
+                if (prog >= 100) {
+                    clearInterval(intval);
+                    jQuery("#generateBtn").html("Complete");
+                } else {
+                    lIndex = response.lIndex;
+                }
+            } else {
+                console.log(response.msg);
+            }
+        });
+    }
+}
 
 
 function removeStaticGenerating() {
@@ -207,56 +210,56 @@ async function manualGenerate(id) {
 
 let manualIntVal;
 let manualgenerating = false;
-// async function setStaticManualGenerateEvent() {
-//     if (!manualgenerating) {
-//         manualgenerating = true;
-//         await jQuery.post(ajaxurl, { action: 'setStaticManualGenerateEvent', }, (response) => {
-//             response = JSON.parse(response);
-//             response.forEach((el) => {
-//                 let id = el.id;
-//                 let progWrap = jQuery("#prog" + id);
-//                 progWrap.find('.done-generate').html(el.done);
-//                 let prog = (100 / el.total) * el.done;
-//                 progWrap.find('.spg-progress-bar').css('width', prog + "%");
-//                 manualgenerating = false;
-//             })
-//         });
-//     }
+async function setStaticManualGenerateEvent() {
+    if (!manualgenerating) {
+        manualgenerating = true;
+        await jQuery.post(ajaxurl, { action: 'setStaticManualGenerateEvent', }, (response) => {
+            response = JSON.parse(response);
+            response.forEach((el) => {
+                let id = el.id;
+                let progWrap = jQuery("#prog" + id);
+                progWrap.find('.done-generate').html(el.done);
+                let prog = (100 / el.total) * el.done;
+                progWrap.find('.spg-progress-bar').css('width', prog + "%");
+                manualgenerating = false;
+            })
+        });
+    }
 
-// }
+}
 
 jQuery(document).ready(function () {
-    // if (jQuery(".listControllerWprogress").length > 0) {
-    //     manualIntVal = setInterval(setStaticManualGenerateEvent, 2000);
-    // }
-    // //Manual Generate
-    // jQuery(".generateNow").on('click', async function (e) {
-    //     let target = jQuery(e.target);
-    //     target.html('<span class="dashicons dashicons-update loading"></span>');
-    //     let wrp = target.closest('.listControllerWprogress');
-    //     //console.log(wrp.find('.cronEnable').is(":checked"));
-    //     wrp.find('.cronEnable').prop("checked", false);//$('#myCheckbox').prop('checked', true); // Checks it
-    //     await jQuery.post(ajaxurl, { action: 'manualGenerateStatus', postID: wrp.attr('data-id') }, (response) => {
-    //         if (response == '1') {
-    //             target.html('Stop');
-    //         } else {
-    //             target.html('Manual Generate');
-    //         }
-    //     });
-    // })
-    // jQuery(".replaceGenerate").on('click', async function (e) {
-    //     let target = jQuery(e.target);
+    if (jQuery(".listControllerWprogress").length > 0) {
+        manualIntVal = setInterval(setStaticManualGenerateEvent, 2000);
+    }
+    //Manual Generate
+    jQuery(".generateNow").on('click', async function (e) {
+        let target = jQuery(e.target);
+        target.html('<span class="dashicons dashicons-update loading"></span>');
+        let wrp = target.closest('.listControllerWprogress');
+        //console.log(wrp.find('.cronEnable').is(":checked"));
+        wrp.find('.cronEnable').prop("checked", false);//$('#myCheckbox').prop('checked', true); // Checks it
+        await jQuery.post(ajaxurl, { action: 'manualGenerateStatus', postID: wrp.attr('data-id') }, (response) => {
+            if (response == '1') {
+                target.html('Stop');
+            } else {
+                target.html('Manual Generate');
+            }
+        });
+    })
+    jQuery(".replaceGenerate").on('click', async function (e) {
+        let target = jQuery(e.target);
 
-    //     jQuery(target).find('span').addClass('loading');
-    //     let wrp = target.closest('.listControllerWprogress');
-    //     await jQuery.post(ajaxurl, { action: 'regenerate', id: wrp.attr('data-id') }, (response) => {
-    //         //response = JSON.parse(response);
-    //         wrp.find(".done-generate").html(0);
-    //         wrp.find('.spg-progress-bar').css('width', '0%');
-    //         jQuery(target).find('span').removeClass('loading');
-    //     });
-    // });
-    //
+        jQuery(target).find('span').addClass('loading');
+        let wrp = target.closest('.listControllerWprogress');
+        await jQuery.post(ajaxurl, { action: 'regenerate', id: wrp.attr('data-id') }, (response) => {
+            //response = JSON.parse(response);
+            wrp.find(".done-generate").html(0);
+            wrp.find('.spg-progress-bar').css('width', '0%');
+            jQuery(target).find('span').removeClass('loading');
+        });
+    });
+
     jQuery(".progDetails").click(() => {
         jQuery(".StaticGeneratingInfo").show();
     });
@@ -480,15 +483,15 @@ async function changeStaticCronStatus(_this) {
     });
 }
 
-async function quickLinkGenerate(_this) {
-    jQuery(".generatedLinks").html("");
-    jQuery(_this).html('<span class="dashicons dashicons-update loading"></span>');
-    let inf = jQuery('#quickLinkInfo').val();
-    await jQuery.post(ajaxurl, { action: 'quickLinkGenerate', str: inf }, (response) => {
-        response = JSON.parse(response);
-        response.forEach((el) => {
-            jQuery(".generatedLinks").append(`<a href="${el}">${el}</a><br>`);
-            jQuery(_this).html('Generate');
-        });
-    });
-}
+// async function quickLinkGenerate(_this) {
+//     jQuery(".generatedLinks").html("");
+//     jQuery(_this).html('<span class="dashicons dashicons-update loading"></span>');
+//     let inf = jQuery('#quickLinkInfo').val();
+//     await jQuery.post(ajaxurl, { action: 'quickLinkGenerate', str: inf }, (response) => {
+//         response = JSON.parse(response);
+//         response.forEach((el) => {
+//             jQuery(".generatedLinks").append(`<a href="${el}">${el}</a><br>`);
+//             jQuery(_this).html('Generate');
+//         });
+//     });
+// }
