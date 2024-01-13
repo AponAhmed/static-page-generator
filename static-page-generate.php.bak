@@ -6,8 +6,11 @@
  * Description: To generate static Page
  * Author: SiATEX
  * Author URI: https://www.siatex.com
- * Version: 2.4.3
+ * Version: 2.4.9.1
  */
+
+namespace StaticPage;
+
 use Aponahmed\StaticPageGenerator\Generator;
 
 require_once 'vendor/autoload.php';
