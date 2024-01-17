@@ -191,9 +191,14 @@ class Generator
                 $slug = $matches[0][2];
                 $file = __SPG_CONTENT . "pages/" . $slug;
                 if (file_exists($file)) {
-                    echo file_get_contents($file);
+                    http_response_code(200);
+                    echo $this->generateContent($file);
                     exit;
                 }
+                // if (file_exists($file)) {
+                //     echo file_get_contents($file);
+                //     exit;
+                // }
             }
         }
     }
