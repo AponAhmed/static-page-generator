@@ -331,47 +331,50 @@ function uploadCsvFile2Server(_this) {
     //console.log(file);
     const $ = jQuery;
     const data = new FormData();
-    if (file.type !== 'application/vnd.ms-excel') {
+    //console.log(file.type);
+    if (file.type == 'application/vnd.ms-excel' || file.type == "text/csv") {
+        data.append('csvUpload', file); // append all files
+        data.append('action', 'svgFile4keyworg'); //ajax Callback
+
+        $.ajax({
+            xhr: function () {
+                var xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function (evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = ((evt.loaded / evt.total) * 100);
+                        $(".csv-progress").width(percentComplete + '%');
+                    }
+                }, false);
+                return xhr;
+            },
+            type: 'POST',
+            url: ajaxurl,
+            data: data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            beforeSend: function () {
+                $(".csv-progress").width('0%');
+            },
+            error: function () {
+                //$('#uploadStatus').html('<p style="color:#EA4335;">File upload failed, please try again.</p>');
+            },
+            success: function (resp) {
+                resp = JSON.parse(resp);
+                console.log(resp.fname);
+                if (!resp.error) {
+                    $(".svgFileList").append(`<li data-name='${resp.fname}' class='csvList' onclick='loadCsv(this)'><span class='removeList' onclick='removeCsv(this)'>&times;</span>${resp.fname}</li>`)
+                } else {
+                    console.log('upload Error');
+                }
+            }
+        });
+    } else {
         alert('File Type must be (*.csv)');
         return;
     }
 
-    data.append('csvUpload', file); // append all files
-    data.append('action', 'svgFile4keyworg'); //ajax Callback
 
-    $.ajax({
-        xhr: function () {
-            var xhr = new window.XMLHttpRequest();
-            xhr.upload.addEventListener("progress", function (evt) {
-                if (evt.lengthComputable) {
-                    var percentComplete = ((evt.loaded / evt.total) * 100);
-                    $(".csv-progress").width(percentComplete + '%');
-                }
-            }, false);
-            return xhr;
-        },
-        type: 'POST',
-        url: ajaxurl,
-        data: data,
-        contentType: false,
-        cache: false,
-        processData: false,
-        beforeSend: function () {
-            $(".csv-progress").width('0%');
-        },
-        error: function () {
-            //$('#uploadStatus').html('<p style="color:#EA4335;">File upload failed, please try again.</p>');
-        },
-        success: function (resp) {
-            resp = JSON.parse(resp);
-            console.log(resp.fname);
-            if (!resp.error) {
-                $(".svgFileList").append(`<li data-name='${resp.fname}' class='csvList' onclick='loadCsv(this)'><span class='removeList' onclick='removeCsv(this)'>&times;</span>${resp.fname}</li>`)
-            } else {
-                console.log('upload Error');
-            }
-        }
-    });
 }
 
 //**
