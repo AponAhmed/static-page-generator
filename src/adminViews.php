@@ -63,6 +63,7 @@ class adminViews
             $codesHtm .= "<span onclick='insertCode(this)' class='code-tool' data-code='{" . $code . "}'>{" . $code . "}</span>";
         }
         $genCount = get_post_meta($post->ID, 'numberOfGenerate', true);
+        $genCount = $genCount > $countData ? $countData : $genCount;
         ?>
         <div class="shortcodeToolbar">
             <?php echo $codesHtm ?>
@@ -92,7 +93,7 @@ class adminViews
         <input type="text" id="slugStructure" name="slugStructure" value="<?php echo $slugStructure ?>" placeholder="Slug Structure" />
         <div class="generateWrap">
             <button type="button" id="generateBtn" onclick="GenerateStaticPage(<?php echo $post->ID; ?>, this)">Generate</button>
-            <input type="number" min="1" name="numberOfGenerate" id="numberOfGenerate" value="<?php echo $genCount ? $genCount : $countData ?>" />
+            <input type="number" min="1" onkeyup="this.value><?php echo $countData ?>?this.value=<?php echo $countData ?>:''" max="<?php echo $countData ?>" name="numberOfGenerate" id="numberOfGenerate" value="<?php echo $genCount ? $genCount : $countData ?>" />
             <button type="button" onclick="deleteStaticPages(<?php echo $post->ID; ?>, this)"><span class="dashicons dashicons-trash"></span></button>
         </div>
         <div class="spg-progress">

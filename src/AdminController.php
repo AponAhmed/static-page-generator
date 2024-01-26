@@ -98,7 +98,7 @@ class AdminController extends adminViews
         } else {
             $filePath = __SPG_CONTENT_CSV . $fileName . ".csv";
             $fp = file($filePath, FILE_SKIP_EMPTY_LINES);
-            return count($fp);
+            return count($fp) - 1;
         }
     }
 
