@@ -203,7 +203,7 @@ class adminViews
                     _.post(ajaxurl, {
                         action: 'generateStaticSitemap'
                     }, function(response) {
-                        _("#sitemanView").attr('href', response).show();
+                        _("#sitemanView").attr('href', response.file).show();
                         _(_this).html('<span class="dashicons dashicons-saved"></span> Generated');
                         setTimeout(function() {
                             _(_this).html('Generate');

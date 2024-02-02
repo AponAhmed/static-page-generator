@@ -784,6 +784,8 @@ class AdminController extends adminViews
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
+        $usedLinks = [];
+        $report = [];
         //$this->generateALLLink(); //Generate All Link File before Generate Sitemap
         $this->deleteSitemaps(true); //Delete Existing generated Files
 
@@ -807,6 +809,8 @@ class AdminController extends adminViews
                 $slugs = array_unique(array_filter($slugs));
                 $inf = pathinfo($file);
                 $id = $inf['filename'];
+                $report[$id] = [];
+                $report[$id]['count'] = 0;
                 $name = get_the_title($id);
                 $slugsArr = array_chunk($slugs, $linkPerFile);
 
@@ -820,6 +824,11 @@ class AdminController extends adminViews
                     $tempLinks = [];
                     foreach ($arr as $slug) {
                         $link = $this->ActualLink($slug);
+                        if (in_array($link, $usedLinks)) {
+                            $report[$id]['skip'][] = $link;
+                            continue;
+                        }
+                        $report[$id]['count']++;
                         $tempLinks[] = $link;
                         //$links[] = $link;
                     }
@@ -859,13 +868,14 @@ class AdminController extends adminViews
         $sitemapGenerator->tempData = $maps;
         $sitemapGenerator->fileName = $this->options['sitemapName'];
         $file = $sitemapGenerator->generateXml(true);
-
+        $report['file'] = $file;
         $sitemapGenerator->generateHtml($dataMaps, $htmlSidebar);
 
         update_option('static_sitemaps_files', json_encode($sitemapGenerator->sitemapFiles));
         //var_dump($sitemapGenerator->sitemapFiles);
         if ($file) {
-            echo $file;
+            echo json_encode($report);
+            //echo $file;
         }
         wp_die();
     }
