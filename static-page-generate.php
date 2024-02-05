@@ -6,7 +6,7 @@
  * Description: To generate static Page
  * Author: SiATEX
  * Author URI: https://www.siatex.com
- * Version: 2.5.3
+ * Version: 2.5.4
  */
 
 namespace StaticPage;

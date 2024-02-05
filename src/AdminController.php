@@ -569,9 +569,9 @@ class AdminController extends adminViews
 
     function slugFilter($slug)
     {
-        $slug = $slug;
         $slug = strtolower($slug);
         $slug = str_replace(" ", "-", strtolower($slug));
+        $slug = str_replace(["`", ".", "'"], "", $slug);
         return trim($slug);
     }
 
@@ -811,6 +811,7 @@ class AdminController extends adminViews
                 $id = $inf['filename'];
                 $report[$id] = [];
                 $report[$id]['count'] = 0;
+                $report[$id]['skip'] = [];
                 $name = get_the_title($id);
                 $slugsArr = array_chunk($slugs, $linkPerFile);
 
