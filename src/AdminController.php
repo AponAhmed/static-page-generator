@@ -571,7 +571,15 @@ class AdminController extends adminViews
     {
         $slug = strtolower($slug);
         $slug = str_replace(" ", "-", strtolower($slug));
-        $slug = str_replace(["`", ".", "'"], "", $slug);
+        $slug = preg_replace("/[^a-z0-9-.\/]/", "", $slug); // Remove characters other than alphanumeric and hyphen
+        // Exclude dot if not followed by "html"
+        $slug = preg_replace("/\.(?!(html)$)/", "", $slug);
+        // Optionally, you can remove consecutive hyphens
+        $slug = preg_replace("/-{2,}/", "-", $slug);
+
+        $slug = str_replace(["`", "'"], "", $slug);
+        $slug = trim($slug, '-');
+
         return trim($slug);
     }
 
