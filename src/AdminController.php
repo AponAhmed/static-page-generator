@@ -276,6 +276,35 @@ class AdminController extends adminViews
         }
         wp_die();
     }
+    /**
+     * Download Csv File
+     */
+    function downloadCsv()
+    {
+        if (isset($_POST['name']) && !empty($_POST['name'])) {
+            $filePath = __SPG_CONTENT_CSV . $_POST['name'] . ".csv";
+
+            if (file_exists($filePath)) {
+                // Read the file content
+                $fileContent = file_get_contents($filePath);
+
+                // Send the file content as a JSON response
+                header('Content-Type: application/json');
+
+                $response = array(
+                    'type' => 'file',
+                    'data' => base64_encode($fileContent),  // Encode file content to base64
+                    'contentType' => 'application/csv',  // Set the appropriate content type
+                    'filename' => basename($filePath),
+                );
+
+                echo json_encode($response);
+                exit;
+            }
+        }
+
+        wp_die();
+    }
 
     /**
      * Upload and store Csv File
@@ -1056,6 +1085,7 @@ class AdminController extends adminViews
                 $headers = [];
                 while (($dataRow = fgetcsv($handle, 10000, ",")) !== FALSE) {
                     $n++;
+                    $dataRow = array_map('utf8_encode', $dataRow);
                     if ($n == 1) {
                         $headers = $dataRow;
                         foreach ($headers as $head) {

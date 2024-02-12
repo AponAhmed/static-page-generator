@@ -235,11 +235,11 @@ class adminViews
             <h2>KeyWords</h2>
             <hr>
             <nav class="nav-tab-wrapper">
-                <a href="#systemKeys" class="nav-tab key-tab nav-tab-active">Keywords</a>
-                <a href="#csvFiles" class="nav-tab key-tab">CSVs</a>
+                <a href="#csvFiles" class="nav-tab key-tab nav-tab-active">CSVs</a>
+                <a href="#systemKeys" class="nav-tab key-tab">Keywords</a>
             </nav>
             <div class="key-tab-content">
-                <div class="key-tab-item active" id="systemKeys">
+                <div class="key-tab-item" id="systemKeys">
                     <div class="keyword-manage">
                         <div class="keyword-groups">
                             <span class="newKey4Static">
@@ -272,7 +272,7 @@ class adminViews
                         </div>
                     </div>
                 </div>
-                <div class="key-tab-item" id="csvFiles">
+                <div class="key-tab-item active" id="csvFiles">
                     <div class="keyword-manage">
                         <div class="keyword-groups">
                             <input style="display: none" onchange="uploadCsvFile2Server(this)" type="file" id="uploadCsv">
@@ -290,7 +290,7 @@ class adminViews
                                 $files = $this->csvFiles();
                                 if ($files) {
                                     foreach ($files as $file) {
-                                        echo "<li data-name='$file' class='csvList' onclick='loadCsv(this)'><span class='removeList' onclick='removeCsv(this)'>&times;</span>$file</li>";
+                                        echo "<li data-name='$file' class='csvList' onclick='loadCsv(this)'><span onclick='downloadCsv(this)' class='dwnCsv'><svg xmlns='http://www.w3.org/2000/svg' class='ionicon' viewBox='0 0 512 512'><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='48' d='M112 268l144 144 144-144M256 392V100'/></svg></span><span class='removeList' onclick='removeCsv(this)'>&times;</span>$file</li>";
                                     }
                                 }
                                 ?>

@@ -61,6 +61,7 @@ class Generator
         add_action('wp_ajax_svgFile4keyworg', [$this->backEnd, 'svgFile4keyworg']);
         add_action('wp_ajax_loadCsv', [$this->backEnd, 'loadCsv']);
         add_action('wp_ajax_removeCsv', [$this->backEnd, 'removeCsv']);
+        add_action('wp_ajax_downloadCsv', [$this->backEnd, 'downloadCsv']);
         add_action('wp_ajax_updateCsvFile', [$this->backEnd, 'updateCsvFile']);
         add_action('wp_ajax_changeStaticCronStatus', [$this->backEnd, 'changeStaticCronStatus']);
         add_action('wp_ajax_deleteSitemaps', [$this->backEnd, 'deleteSitemaps']);
@@ -129,7 +130,10 @@ class Generator
     {
         global $wp;
         if (is_404()) {
-            $siteUrl = site_url() . "/";
+            // Record the start time
+            $start_time = microtime(true);
+
+            $siteUrl = get_bloginfo('url') . "/";
             $siteUrl = preg_replace('/([^:])(\/{2,})/', '$1/', $siteUrl);
             $current_url = home_url(add_query_arg(array(), $wp->request));
 
@@ -140,6 +144,20 @@ class Generator
             if (file_exists($file)) {
                 http_response_code(200);
                 echo $this->generateContent($file);
+
+                if (is_user_logged_in()) { //Performance
+                    $end_time = microtime(true);
+                    $execution_time = ($end_time - $start_time) * 1000;
+                    $ms = number_format($execution_time, 3, ".", null);
+                    if ($ms > 0 && $ms < 2000) {
+                        $color = 'green';
+                    } elseif ($ms >= 2000 && $ms < 4500) {
+                        $color = 'yellow';
+                    } else {
+                        $color = 'red';
+                    }
+                    echo "<div style='position: fixed; bottom: 0; right: 0; background-color: #000; color: #999; font-size: 12px; padding: 2px 10px;width: 100%;'>Static Page taken: <span style='color: $color;font-size:inherit'>" . $ms . " ms</span> to generate output</div>";
+                }
                 exit;
             } else {
                 return $template;

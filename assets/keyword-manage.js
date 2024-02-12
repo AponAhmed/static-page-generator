@@ -460,9 +460,40 @@ async function removeCsv(_this) {
     let fileName = jQuery(_this).parent().attr('data-name');
     if (confirm('Are you sure to delete ?')) {
         await jQuery.post(ajaxurl, { action: 'removeCsv', name: fileName }, (response) => {
-            console.log(response);
             jQuery(_this).parent().remove();
             jQuery(".svg-data").html("");
+        });
+    }
+}
+async function downloadCsv(_this) {
+    let fileName = jQuery(_this).parent().attr('data-name');
+    if (confirm('Are you sure to Download ?')) {
+        await jQuery.post(ajaxurl, { action: 'downloadCsv', name: fileName }, (response) => {
+
+            // Check if the response is a file download
+            if (response && response.type === 'file') {
+                // Decode base64-encoded content
+                var decodedContent = atob(response.data);
+
+                // Create a Blob from the decoded content
+                var blob = new Blob([decodedContent], { type: response.contentType });
+
+                // Create a link element and trigger a download
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = response.filename;
+
+                // Append the link to the body and programmatically trigger the click event
+                document.body.appendChild(link);
+                link.click();
+
+                // Clean up by removing the link element
+                document.body.removeChild(link);
+            } else {
+                // Handle other types of responses or errors
+                console.error('Unexpected response:', response);
+            }
+
         });
     }
 }
