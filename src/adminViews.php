@@ -57,7 +57,9 @@ class adminViews
         $slugStructure = get_post_meta($post->ID, 'slugStructure', true);
         $keywordFile = get_post_meta($post->ID, 'keywordFile', true);
         $codes = $this->getShortcodes($keywordFile);
+
         $countData = $this->getCount($keywordFile, $post->ID);
+
         $codesHtm = "";
         foreach ($codes as $code) {
             $codesHtm .= "<span onclick='insertCode(this)' class='code-tool' data-code='{" . $code . "}'>{" . $code . "}</span>";

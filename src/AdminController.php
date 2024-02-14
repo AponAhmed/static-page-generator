@@ -17,6 +17,10 @@ class AdminController extends adminViews
     private $siteUrl;
     private $fileName = "static";
 
+    private $cId;
+    private $cLinks;
+    private $currentCsvData;
+
     //put your code here
     public function __construct($options)
     {
@@ -83,11 +87,9 @@ class AdminController extends adminViews
 
     function getCount($fileName, $postID)
     {
-
-        if (empty($fileName)) {
+        if ($fileName == "") {
             //Default Key
             $data = $this->dataMap(false, $postID);
-
             $bigElement = $data;
             //Short by Length
             usort($bigElement, function ($a, $b) {
@@ -519,7 +521,7 @@ class AdminController extends adminViews
 
     function generateStaticPageSingle($id = false)
     {
-        $atATime = 17;
+        $atATime = 20;
         self::debug();
         $startTime = microtime(true);
         $die = false;
@@ -545,6 +547,9 @@ class AdminController extends adminViews
                 $index = 0;
             }
 
+            $this->cId = $id;
+            $this->cLinks = [];
+            $this->currentCsvData = null;
 
             $content = ['id' => $id];
             $info = [];
@@ -570,7 +575,8 @@ class AdminController extends adminViews
 
                     if ($slug != "" && $content != "") {
                         if ($this->writeFile(json_encode($content), $slug)) {
-                            $this->addLink($id, $slug);
+                            //$this->addLink($id, $slug);
+                            $this->cLinks[] = $slug;
                             $info['error'] = false;
                             $info['links'][] = $actualLink;
                             $info['lIndex'] = $index;
@@ -584,6 +590,8 @@ class AdminController extends adminViews
                 }
                 $index += 1;
             }
+            //Save Links To File
+            $this->saveCLinks();
         }
         update_post_meta($id, 'lastIndex', $index);
 
@@ -636,6 +644,17 @@ class AdminController extends adminViews
             unlink($filename);
         }
     }
+
+    function saveCLinks()
+    {
+        $id = $this->cId;
+        $filename = __SPG_CONTENT . "links/$id.txt";
+        $file = fopen($filename, "a");
+        $slugStr = implode(PHP_EOL, $this->cLinks);
+        fwrite($file, $slugStr . PHP_EOL);
+        fclose($file);
+    }
+
 
     function addLink($id, $slug)
     {
@@ -1003,13 +1022,18 @@ class AdminController extends adminViews
 
     /**
      * Replace or Filter String With Current Index of Keyword
-     * @param type $str
-     * @param type $index
-     * @return String
+     * @param string $str
+     * @param int $index
+     * @return string
      */
     function filterData($str = "", $index = 0, $postID = false)
     {
-        $data = $this->dataMap(false, $postID);
+        if (!$this->currentCsvData) {
+            $this->currentCsvData = $this->dataMap(false, $postID);
+        }
+        $data = $this->currentCsvData;
+        //$data = $this->dataMap(false, $postID);
+
         $cods = array_keys($data);
         $cods = array_filter(array_map(function ($b) {
             return '{' . $b . '}';
@@ -1026,15 +1050,13 @@ class AdminController extends adminViews
         }
 
         $replace = [];
-        foreach ($data as $k => $valArr) {
+        foreach ($data as $col => $valArr) {
             if (isset($valArr[$index])) {
                 $replace[] = $valArr[$index];
             } else {
                 $replace[] = "";
             }
         }
-
-
         return str_replace($cods, $replace, $str);
     }
 
@@ -1072,7 +1094,7 @@ class AdminController extends adminViews
      * @param string $dir
      * @return array
      */
-    function dataMap($dir = false, $postID = false)
+    function dataMap_ex($dir = false, $postID = false)
     {
         $data = [];
         $keywordFile = get_post_meta($postID, 'keywordFile', true);
@@ -1124,6 +1146,61 @@ class AdminController extends adminViews
         //]
         return $data;
     }
+
+    function dataMap($dir = false, $postID = false)
+    {
+        $data = [];
+        $keywordFile = get_post_meta($postID, 'keywordFile', true);
+        if ($postID && $keywordFile != "") {
+            $keywordFile = get_post_meta($postID, 'keywordFile', true);
+            $filePath = __SPG_CONTENT_CSV . $keywordFile . ".csv";
+
+            if (($handle = fopen($filePath, "r")) !== FALSE) {
+                $n = 0;
+                $headers = [];
+                while (($dataRow = fgetcsv($handle, 10000, ",")) !== FALSE) {
+                    $n++;
+                    $dataRow = array_map('utf8_encode', $dataRow);
+                    if ($n == 1) {
+                        $headers = $dataRow;
+                        foreach ($headers as $head) {
+                            $data[$head] = [];
+                        }
+                        continue;
+                    } //Header---
+                    //var_dump($headers);
+
+                    foreach ($dataRow as $k => $col) {
+                        $indx = $headers[$k];
+                        $data[$indx][] = $col;
+                    }
+                }
+                fclose($handle); // Close the file handle
+            }
+        } else {
+            if (!$dir) {
+                $dir = __SPG_CONTENT_DATA;
+            }
+            $ignored = array('.', '..', '.svn', '.htaccess');
+
+            $files = array();
+            foreach (scandir($dir) as $file) {
+                $filePath = pathinfo($file);
+                $fileName = $filePath['filename'];
+                if (in_array($file, $ignored))
+                    continue;
+                $content = file_get_contents($dir . $file);
+                $arr = preg_split("/\r\n|\n|\r/", $content);
+                $data[$fileName] = array_unique(array_filter($arr));
+            }
+        }
+        //[
+        //'index1'=>[0,1,2,3],
+        //'index2'=>[0,1,2,3],
+        //]
+        return $data;
+    }
+
 
     //Ajax Request
     function loadKeyesData()

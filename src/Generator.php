@@ -4,6 +4,7 @@ namespace Aponahmed\StaticPageGenerator;
 
 use Aponahmed\StaticPageGenerator\AdminController;
 use Aponahmed\StaticPageGenerator\FrontendController;
+use PerformanceChecker;
 
 /**
  * Description of Generator
@@ -19,6 +20,8 @@ class Generator
 
     public function __construct()
     {
+        //add_action('init', array($this, 'start_timer'), 0);
+
         $this->options = [
             'postType' => 'static_post',
             'gmood' => get_option('staticGmood'),
@@ -34,13 +37,16 @@ class Generator
         add_action('init', [$this, 'rewrite_set_preview'], 0);
         add_filter('query_vars', [$this, 'query_var_set_preview']);
 
-        if ($this->options['custom_slug_enable'] == "1") {
-            add_action('init', [$this, 'rewrite_set'], 0);
-            add_filter('query_vars', [$this, 'query_var_set']);
-            $this->customRewrite();
-        } else {
-            add_action('template_include', [$this, 'nonCustomSlug'], 1);
-        }
+        // if ($this->options['custom_slug_enable'] == "1") {
+        //     add_action('init', [$this, 'rewrite_set'], 0);
+        //     add_filter('query_vars', [$this, 'query_var_set']);
+        //     $this->customRewrite();
+        // } else {
+        //     add_action('template_include', [$this, 'nonCustomSlug'], 1);
+        // }
+
+        add_action('template_include', [$this, 'nonCustomSlug'], 0);
+
         add_action('template_include', [$this, 'staticPostTemplate']);
         //
         $this->backEnd = new AdminController($this->options);
@@ -68,6 +74,14 @@ class Generator
         add_action('wp_ajax_manualGenerateStatus', [$this->backEnd, 'manualGenerateStatus']);
         add_action('wp_ajax_setStaticManualGenerateEvent', [$this->backEnd, 'setStaticManualGenerateEvent']);
         // add_action('wp_ajax_quickLinkGenerate', [$this->backEnd, 'quickLinkGenerate']);
+    }
+
+
+    public function start_timer()
+    {
+        global $wp_start_time;
+        //echo "---hello";
+        $wp_start_time = microtime(true);
     }
 
     function SetScheduler()
@@ -115,7 +129,7 @@ class Generator
             $total = get_post_meta($id, 'numberOfGenerate', true);
             $generated = $this->backEnd->countLinks($id);
             if ($generated < $total) { //Not Complete 
-                $this->backEnd->generateStaticPageSingle($id, $total, $generated);
+                $this->backEnd->generateStaticPageSingle($id);
             }
         }
         //echo "This is raned From Cron";
@@ -128,10 +142,13 @@ class Generator
 
     function nonCustomSlug($template)
     {
-        global $wp;
+        global $wp, $perform;
+
         if (is_404()) {
-            // Record the start time
-            $start_time = microtime(true);
+            if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
+                //var_dump($perform);
+                $perform->start('staticpage', 'Static Page Generate', ['file' => __FILE__, 'line' => __LINE__]);
+            }
 
             $siteUrl = get_bloginfo('url') . "/";
             $siteUrl = preg_replace('/([^:])(\/{2,})/', '$1/', $siteUrl);
@@ -145,18 +162,9 @@ class Generator
                 http_response_code(200);
                 echo $this->generateContent($file);
 
-                if (is_user_logged_in()) { //Performance
-                    $end_time = microtime(true);
-                    $execution_time = ($end_time - $start_time) * 1000;
-                    $ms = number_format($execution_time, 3, ".", null);
-                    if ($ms > 0 && $ms < 2000) {
-                        $color = 'green';
-                    } elseif ($ms >= 2000 && $ms < 4500) {
-                        $color = 'yellow';
-                    } else {
-                        $color = 'red';
-                    }
-                    echo "<div style='position: fixed; bottom: 0; right: 0; background-color: #000; color: #999; font-size: 12px; padding: 2px 10px;width: 100%;'>Static Page taken: <span style='color: $color;font-size:inherit'>" . $ms . " ms</span> to generate output</div>";
+                if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
+                    $perform->end('staticpage');
+                    echo $perform->html(true);
                 }
                 exit;
             } else {
@@ -167,11 +175,35 @@ class Generator
         }
     }
 
+    function performanceColor($ms)
+    {
+        if ($ms < 1500) {
+            return 'green';
+        } elseif ($ms < 2500) {
+            return 'yellow';
+        } else {
+            return 'red';
+        }
+    }
+
     function generateContent($file)
     {
+        global $perform;
+
         $jsonData = file_get_contents($file);
         $data = json_decode($jsonData, true);
+        //Example Uses
+
+        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
+            $perform->start('get_static_page_content', 'Static Page Get Content', ['file' => __FILE__, 'line' => __LINE__]);
+        }
+
         $content = $this->getContentById($data['id']);
+
+        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
+            $perform->end('get_static_page_content');
+        }
+
         $content = str_replace($data['replacer']['find'], $data['replacer']['replace'], $content);
         $content = $this->backEnd->internalLinkFilter($content, $data['slug']);
         return do_shortcode($content);
@@ -179,6 +211,8 @@ class Generator
 
     public function getContentById($id)
     {
+
+
         error_reporting(0);
         update_option('staticGmood', '1');
 
