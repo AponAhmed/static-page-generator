@@ -1065,7 +1065,10 @@ class AdminController extends adminViews
         $data = $this->dataMap(false, $postID);
         $cods = array_keys($data);
         $cods = array_filter(array_map(function ($b) {
-            return '{' . $b . '}';
+            if (!empty($b)) {
+                return '{' . $b . '}';
+            }
+            //return '{' . $b . '}';
         }, $cods));
 
         $bigElement = $data;
@@ -1081,7 +1084,10 @@ class AdminController extends adminViews
 
         foreach ($data as $k => $valArr) {
             if (isset($valArr[$index])) {
-                $replace[] = $valArr[$index];
+                if (!empty($valArr[$index])) {
+                    $replace[] = $valArr[$index];
+                }
+                //$replace[] = $valArr[$index];
             } else {
                 $replace[] = "";
             }
@@ -1164,15 +1170,19 @@ class AdminController extends adminViews
                     if ($n == 1) {
                         $headers = $dataRow;
                         foreach ($headers as $head) {
-                            $data[$head] = [];
+                            if ($head != "") {
+                                $data[$head] = [];
+                            }
                         }
                         continue;
                     } //Header---
                     //var_dump($headers);
 
                     foreach ($dataRow as $k => $col) {
-                        $indx = $headers[$k];
-                        $data[$indx][] = $col;
+                        if (isset($headers[$k])) {
+                            $indx = $headers[$k];
+                            $data[$indx][] = $col;
+                        }
                     }
                 }
                 fclose($handle); // Close the file handle
@@ -1200,6 +1210,7 @@ class AdminController extends adminViews
         //]
         return $data;
     }
+
 
 
     //Ajax Request
