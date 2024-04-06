@@ -96,11 +96,15 @@ class AdminController extends adminViews
                 return count($b) - count($a);
             });
             $bigElement = $bigElement[0];
-            return count($bigElement);
+            if ($bigElement) {
+                return count($bigElement);
+            }
         } else {
             $filePath = __SPG_CONTENT_CSV . $fileName . ".csv";
             $fp = file($filePath, FILE_SKIP_EMPTY_LINES);
-            return count($fp) - 1;
+            if ($fp) {
+                return count($fp) - 1;
+            }
         }
     }
 
