@@ -96,13 +96,13 @@ class AdminController extends adminViews
                 return count($b) - count($a);
             });
             $bigElement = $bigElement[0];
-            if ($bigElement) {
+            if (is_array($bigElement)) {
                 return count($bigElement);
             }
         } else {
             $filePath = __SPG_CONTENT_CSV . $fileName . ".csv";
             $fp = file($filePath, FILE_SKIP_EMPTY_LINES);
-            if ($fp) {
+            if (is_array($fp)) {
                 return count($fp) - 1;
             }
         }
@@ -1170,7 +1170,11 @@ class AdminController extends adminViews
                 $headers = [];
                 while (($dataRow = fgetcsv($handle, 10000, ",")) !== FALSE) {
                     $n++;
-                    $dataRow = array_map('utf8_encode', $dataRow);
+                    //$dataRow = array_map('utf8_encode', $dataRow);
+                    $dataRow = array_map(function($value) {
+                        return mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+                    }, $dataRow);
+                    
                     if ($n == 1) {
                         $headers = $dataRow;
                         foreach ($headers as $head) {
