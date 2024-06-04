@@ -932,6 +932,9 @@ class AdminController extends adminViews
         $report['file'] = $file;
         $sitemapGenerator->generateHtml($dataMaps, $htmlSidebar);
 
+        //All Static Links
+        //var_dump($this->allLinks());
+
         update_option('static_sitemaps_files', json_encode($sitemapGenerator->sitemapFiles));
         //var_dump($sitemapGenerator->sitemapFiles);
         if ($file) {
@@ -1171,10 +1174,10 @@ class AdminController extends adminViews
                 while (($dataRow = fgetcsv($handle, 10000, ",")) !== FALSE) {
                     $n++;
                     //$dataRow = array_map('utf8_encode', $dataRow);
-                    $dataRow = array_map(function($value) {
+                    $dataRow = array_map(function ($value) {
                         return mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
                     }, $dataRow);
-                    
+
                     if ($n == 1) {
                         $headers = $dataRow;
                         foreach ($headers as $head) {
