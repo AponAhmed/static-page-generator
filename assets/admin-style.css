@@ -210,16 +210,40 @@
     margin-bottom: 10px;
 }
 
+
+.generatedLinks {
+    background: #eee;
+    border-radius: 3px;
+}
+
+#staticLinksUl li a {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+#staticLinksUl {
+    overflow: auto;
+    scrollbar-width: thin;
+    max-height: 200px;
+    padding: 4px 8px;
+}
+
+#staticLinksUl li {
+    margin: 0;
+    line-height: 1.2;
+}
+
 /*Progress*/
 .spg-progress {
-    height: 20px;
-    background: #fff;
-    margin: 20px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-    display: none;
+	height: 20px;
+	background: #fff;
+	margin: 20px 0;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	position: relative;
+	overflow: hidden;
+	display: none;
+	margin-bottom: 10px;
 }
 
 .spg-progress.visible {
