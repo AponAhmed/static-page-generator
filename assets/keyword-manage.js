@@ -123,6 +123,9 @@ async function deleteStaticPages(id, _this) {
         response = JSON.parse(response);
         if (!response.error) {
             jQuery(_this).html("<span class='dashicons dashicons-saved'></span>");
+            jQuery('.progDetails').css('width', '0%');
+            jQuery("#generateBtn").attr('data-progress', '0');
+            jQuery("#staticLinksUl").html("");
             setTimeout(function () {
                 jQuery(_this).html("<span class='dashicons dashicons-trash'></span>");
             }, 2000);
@@ -134,6 +137,12 @@ async function deleteStaticPages(id, _this) {
 
 
 async function GenerateStaticPage(id, _this) {
+    let progressRemaining = jQuery(_this).attr("data-progress");
+    if (progressRemaining >= 100) {
+        alert("Please Delete already Generated Page first !");
+        //return;
+    }
+
     jQuery(_this).html("<span class='dashicons dashicons-update loading'></span> Processing");
     limit = jQuery("#numberOfGenerate").val();
     await jQuery.post(ajaxurl, { action: 'generateStaticPage', id: id, limit: limit }, (response) => {
@@ -172,6 +181,15 @@ async function generateSingle() {
             response = JSON.parse(response);
             if (!response.error) {
                 done = (response.lIndex + 1);
+                if (response.already_complete) {
+                    clearInterval(intval);
+                    jQuery(".Generatingdetails").html("<h2>Already Generated all</h2>");
+                    jQuery(".Generatingdetails").append(jQuery('#staticLinksUl').html());
+                    jQuery(".countGenerate").hide();
+                    jQuery(".spg-progress-bar").css("width", '100%');
+                    jQuery("#generateBtn").html("Complete");
+                    return;
+                }
                 let prog = ((100 / limit) * done).toFixed(2);
                 jQuery(".spg-progress-bar").css('width', prog + "%");
                 jQuery(".gDone").html(done);
@@ -182,7 +200,9 @@ async function generateSingle() {
 
                 response.links.forEach(lnk => {
                     jQuery(".Generatingdetails").prepend(`<div class='static-info-item'><label>link <a target='_blank' href='${lnk}'>${lnk}</a></label><label>Time Taken:${(timeCons / response.links.length).toFixed(2)}ms</label></div>`);
+                    jQuery("#staticLinksUl").prepend(`<li><a target='_blank' href='${lnk}'>${lnk}</a></li>`);
                 });
+
 
                 if (prog >= 100) {
                     clearInterval(intval);
