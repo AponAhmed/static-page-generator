@@ -66,6 +66,15 @@ class adminViews
         }
         $genCount = get_post_meta($post->ID, 'numberOfGenerate', true);
         $genCount = $genCount > $countData ? $countData : $genCount;
+
+
+        $generated = $this->countLinks($post->ID);
+        $perc = 0;
+        if ($genCount > 0 && $generated > 0) {
+            $perc = (100 / $genCount) * $generated;
+        }
+        var_dump($perc);
+        $links = $this->getLinks($post->ID);
         ?>
         <div class="shortcodeToolbar">
             <?php echo $codesHtm ?>
@@ -94,12 +103,20 @@ class adminViews
         <label>Permalink</label>
         <input type="text" id="slugStructure" name="slugStructure" value="<?php echo $slugStructure ?>" placeholder="Slug Structure" />
         <div class="generateWrap">
-            <button type="button" id="generateBtn" onclick="GenerateStaticPage(<?php echo $post->ID; ?>, this)">Generate</button>
+            <button type="button" id="generateBtn" data-progress="<?php echo $perc ?>" onclick="GenerateStaticPage(<?php echo $post->ID; ?>, this)">Generate</button>
             <input type="number" min="1" onkeyup="this.value><?php echo $countData ?>?this.value=<?php echo $countData ?>:''" max="<?php echo $countData ?>" name="numberOfGenerate" id="numberOfGenerate" value="<?php echo $genCount ? $genCount : $countData ?>" />
             <button type="button" onclick="deleteStaticPages(<?php echo $post->ID; ?>, this)"><span class="dashicons dashicons-trash"></span></button>
         </div>
-        <div class="spg-progress">
-            <div class="spg-progress-bar progDetails"></div>
+        <div class="spg-progress visible">
+            <div class="spg-progress-bar progDetails" style="width:<?php echo $perc ?>%"></div>
+        </div>
+        <div><a href='javascript:void(0)' onclick="jQuery('.generatedLinks').slideToggle('slow')">List of Links</a></div>
+        <div class="generatedLinks hidden">
+            <ul id="staticLinksUl">
+                <?php foreach ($links as $link) : ?>
+                    <li><a href="<?php echo site_url() . "/" . $link; ?>" target="_blank"><?php echo site_url() . "/" . $link; ?></a></li>
+                <?php endforeach; ?>
+            </ul>
         </div>
     <?php
     }
