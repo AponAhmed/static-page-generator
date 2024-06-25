@@ -525,6 +525,11 @@ class AdminController extends adminViews
 
     function generateStaticPageSingle($id = false)
     {
+        $info = [
+            'links' => [],
+            'error' => false,
+        ];
+
         $atATime = 20;
         self::debug();
         $startTime = microtime(true);
@@ -536,66 +541,74 @@ class AdminController extends adminViews
         $total = get_post_meta($id, 'numberOfGenerate', true);
         $generated = $this->countLinks($id);
 
-        if ($id) {
-            $orgLink = get_permalink($id);
-            $slugStructure = get_post_meta($id, 'slugStructure', true);
-            if (!empty($slugStructure)) {
-                $slugStructure = str_replace(" ", "-", strtolower($slugStructure));
-            }
+        //$index = get_post_meta($id, 'lastIndex', true);
+        $index = $this->countLinks($id);
+        //var_dump($index);
+        //exit;
+        if ($index === false) {
+            $index = 0;
+        }
 
-            //$index = get_post_meta($id, 'lastIndex', true);
-            $index = $this->countLinks($id);
-            //var_dump($index);
-            //exit;
-            if ($index === false) {
-                $index = 0;
-            }
+        if ($total < $generated) {
 
-            $this->cId = $id;
-            $this->cLinks = [];
-            $this->currentCsvData = null;
 
-            $content = ['id' => $id];
-            $info = [];
-            for ($i = 0; $i < $atATime; $i++) {
-                if ($generated >= $total)
-                    break;
-                $generated++;
-
-                if ($content) {
-                    $slug = $this->filterData($slugStructure, $index, $id);
-                    $slug = $this->slugFilter($slug);
-
-                    //$content = $this->internalLinkFilter($content, $slug); //Slug for Skip
-                    $content['slug'] = $slug;
-
-                    $replacer = $this->filterDataMap($index, $id);
-
-                    $actualLink = $this->ActualLink($slug);
-                    //$content = str_replace($orgLink, $actualLink, $content);
-                    $replacer['find'][] = $orgLink;
-                    $replacer['replace'][] = $actualLink;
-                    $content['replacer'] = $replacer;
-
-                    if ($slug != "" && $content != "") {
-                        if ($this->writeFile(json_encode($content), $slug)) {
-                            //$this->addLink($id, $slug);
-                            $this->cLinks[] = $slug;
-                            $info['error'] = false;
-                            $info['links'][] = $actualLink;
-                            $info['lIndex'] = $index;
-                        } else {
-                            $info['error'] = true;
-                            $info['lIndex'] = ($index > 0 ? ($index - 1) : 0);
-                        }
-                    }
-                } else {
-                    $info = ['error' => true, 'msg' => 'Page Content Missing'];
+            if ($id) {
+                $orgLink = get_permalink($id);
+                $slugStructure = get_post_meta($id, 'slugStructure', true);
+                if (!empty($slugStructure)) {
+                    $slugStructure = str_replace(" ", "-", strtolower($slugStructure));
                 }
-                $index += 1;
+
+
+
+                $this->cId = $id;
+                $this->cLinks = [];
+                $this->currentCsvData = null;
+
+                $content = ['id' => $id];
+
+                for ($i = 0; $i < $atATime; $i++) {
+                    if ($generated >= $total)
+                        break;
+                    $generated++;
+
+                    if ($content) {
+                        $slug = $this->filterData($slugStructure, $index, $id);
+                        $slug = $this->slugFilter($slug);
+
+                        //$content = $this->internalLinkFilter($content, $slug); //Slug for Skip
+                        $content['slug'] = $slug;
+
+                        $replacer = $this->filterDataMap($index, $id);
+
+                        $actualLink = $this->ActualLink($slug);
+                        //$content = str_replace($orgLink, $actualLink, $content);
+                        $replacer['find'][] = $orgLink;
+                        $replacer['replace'][] = $actualLink;
+                        $content['replacer'] = $replacer;
+
+                        if ($slug != "" && $content != "") {
+                            if ($this->writeFile(json_encode($content), $slug)) {
+                                //$this->addLink($id, $slug);
+                                $this->cLinks[] = $slug;
+                                $info['error'] = false;
+                                $info['links'][] = $actualLink;
+                                $info['lIndex'] = $index;
+                            } else {
+                                $info['error'] = true;
+                                $info['lIndex'] = ($index > 0 ? ($index - 1) : 0);
+                            }
+                        }
+                    } else {
+                        $info = ['error' => true, 'msg' => 'Page Content Missing'];
+                    }
+                    $index += 1;
+                }
+                //Save Links To File
+                $this->saveCLinks();
             }
-            //Save Links To File
-            $this->saveCLinks();
+        } else {
+            $info['already_complete'] = true;
         }
         update_post_meta($id, 'lastIndex', $index);
 
@@ -676,6 +689,22 @@ class AdminController extends adminViews
             return $lines;
         }
         return 0;
+    }
+
+    function getLinks($id)
+    {
+        // Define the filename based on the given ID
+        $filename = __SPG_CONTENT . "links/$id.txt";
+
+        // Check if the file exists
+        if (file_exists($filename)) {
+            // Read the file into an array, where each line becomes an element in the array
+            $urls = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            return $urls;
+        } else {
+            // Handle the case where the file does not exist
+            return array();
+        }
     }
 
     function regenerate()
