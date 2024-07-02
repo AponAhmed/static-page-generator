@@ -549,9 +549,7 @@ class AdminController extends adminViews
             $index = 0;
         }
 
-        if ($total < $generated) {
-
-
+        if ($generated < $total) {
             if ($id) {
                 $orgLink = get_permalink($id);
                 $slugStructure = get_post_meta($id, 'slugStructure', true);
@@ -901,7 +899,13 @@ class AdminController extends adminViews
                 $report[$id] = [];
                 $report[$id]['count'] = 0;
                 $report[$id]['skip'] = [];
+
+                //$name = get_post_field('post_name', $id);
                 $name = get_the_title($id);
+                // Remove all expressions within curly braces
+                $name = preg_replace('/\{.*?\}/', '', $name);
+                $name = str_replace(' in ', '', $name);
+
                 $slugsArr = array_chunk($slugs, $linkPerFile);
 
                 $dataMaps[$id]['name'] = $name;
