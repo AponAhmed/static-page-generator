@@ -73,7 +73,7 @@ class adminViews
         if ($genCount > 0 && $generated > 0) {
             $perc = (100 / $genCount) * $generated;
         }
-        var_dump($perc);
+        //var_dump($perc);
         $links = $this->getLinks($post->ID);
         ?>
         <div class="shortcodeToolbar">
