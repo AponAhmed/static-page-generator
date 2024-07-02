@@ -191,6 +191,7 @@ async function generateSingle() {
                     return;
                 }
                 let prog = ((100 / limit) * done).toFixed(2);
+                jQuery("#generateBtn").attr('data-progress', prog);
                 jQuery(".spg-progress-bar").css('width', prog + "%");
                 jQuery(".gDone").html(done);
                 generating = false;
