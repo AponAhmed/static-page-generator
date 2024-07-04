@@ -154,6 +154,16 @@ class Generator
             $siteUrl = preg_replace('/([^:])(\/{2,})/', '$1/', $siteUrl);
             $current_url = home_url(add_query_arg(array(), $wp->request));
 
+            $rqUri = $_SERVER['REQUEST_URI'];
+            // Check if the URL does not end with a forward slash
+            if (substr($rqUri, -1) !== '/') {
+                // Add a forward slash at the end
+                $new_url = $current_url . '/';
+                // Redirect to the new URL
+                wp_redirect($new_url, 301); // 301 indicates a permanent redirect
+                exit;
+            }
+
             $slug = str_replace($siteUrl, "", $current_url);
             $slug = preg_replace('/([^:])(\/{2,})/', '$1/', $slug);
             $file = __SPG_CONTENT . "pages/" . $slug;
