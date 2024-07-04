@@ -114,7 +114,7 @@ class adminViews
         <div class="generatedLinks hidden">
             <ul id="staticLinksUl">
                 <?php foreach ($links as $link) : ?>
-                    <li><a href="<?php echo site_url() . "/" . $link; ?>" target="_blank"><?php echo site_url() . "/" . $link; ?></a></li>
+                    <li><a href="<?php echo site_url() . "/" . $link."/"; ?>" target="_blank"><?php echo site_url() . "/" . $link."/"; ?></a></li>
                 <?php endforeach; ?>
             </ul>
         </div>
