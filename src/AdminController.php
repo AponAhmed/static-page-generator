@@ -60,13 +60,33 @@ class AdminController extends adminViews
         error_reporting(E_ALL);
     }
 
+    function custom_sanitize_slug($string) {
+        // Convert to lowercase
+        $string = strtolower($string);
+    
+        // Replace spaces with hyphens
+        $string = preg_replace('/\s+/', '-', $string);
+    
+        // Remove special characters except for curly braces
+        $string = preg_replace('/[^\w\-{}]/', '', $string);
+    
+        // Replace multiple hyphens with a single hyphen
+        $string = preg_replace('/-+/', '-', $string);
+    
+        // Trim hyphens from the beginning and end of the string
+        $string = trim($string, '-');
+    
+        return $string;
+    }
+
     function store_meta_data($post_id)
     {
         if (array_key_exists('slugStructure', $_POST)) {
+            $structure = $this->custom_sanitize_slug(trim($_POST['slugStructure']));
             update_post_meta(
                 $post_id,
                 'slugStructure',
-                trim($_POST['slugStructure'])
+                $structure
             );
         }
         if (array_key_exists('keywordFile', $_POST)) {
