@@ -155,10 +155,10 @@ class Generator
             $current_url = home_url(add_query_arg(array(), $wp->request));
 
             $rqUri = $_SERVER['REQUEST_URI'];
-            // Check if the URL does not end with a forward slash
-            if (substr($rqUri, -1) !== '/') {
+            // Check if the URL does not end with a slash and does not contain ".html" at the end
+            if (substr($rqUri, -1) !== '/' && substr($rqUri, -5) !== '.html') {
                 // Add a forward slash at the end
-                $new_url = $current_url . '/';
+                $new_url = $rqUri . '/';
                 // Redirect to the new URL
                 wp_redirect($new_url, 301); // 301 indicates a permanent redirect
                 exit;
