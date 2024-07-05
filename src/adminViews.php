@@ -114,7 +114,14 @@ class adminViews
         <div class="generatedLinks hidden">
             <ul id="staticLinksUl">
                 <?php foreach ($links as $link) : ?>
-                    <li><a href="<?php echo site_url() . "/" . $link."/"; ?>" target="_blank"><?php echo site_url() . "/" . $link."/"; ?></a></li>
+                    <?php
+                    // Check if the URL does not end with a slash and does not contain ".html" at the end
+                    if (substr($link, -1) !== '/' && substr($link, -5) !== '.html') {
+                        // Add a forward slash at the end
+                        $link = $link . '/';
+                    }
+                    ?>
+                    <li><a href="<?php echo site_url() . "/" . $link; ?>" target="_blank"><?php echo site_url() . "/" . $link; ?></a></li>
                 <?php endforeach; ?>
             </ul>
         </div>
