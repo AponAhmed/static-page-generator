@@ -68,7 +68,7 @@ class AdminController extends adminViews
         $string = preg_replace('/\s+/', '-', $string);
     
         // Remove special characters except for curly braces
-        $string = preg_replace('/[^\w\-{}]/', '', $string);
+        $string = preg_replace('/[^\w\-{}\/\.]/', '', $string);
     
         // Replace multiple hyphens with a single hyphen
         $string = preg_replace('/-+/', '-', $string);
