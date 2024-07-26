@@ -5,6 +5,7 @@ namespace Aponahmed\StaticPageGenerator;
 use Aponahmed\StaticPageGenerator\AdminController;
 use Aponahmed\StaticPageGenerator\FrontendController;
 use PerformanceChecker;
+use WP_Query;
 
 /**
  * Description of Generator
@@ -24,7 +25,7 @@ class Generator
 
         $this->options = [
             'postType' => 'static_post',
-            'gmood' => get_option('staticGmood'),
+            //'gmood' => get_option('staticGmood'),
         ];
 
         //Folder Creation and Resource File initialization
@@ -221,16 +222,52 @@ class Generator
 
     public function getContentById($id)
     {
+        global $post, $wp_query;
+        ob_start();
+        $post = get_post($id);
+        if ($post) {
+            // Set the global post variable
+            $GLOBALS['post'] = $post;
+            setup_postdata($post);
+
+            // Modify the global $wp_query to set the post as the queried object
+            $wp_query = new WP_Query(array(
+                'p' => $post->ID,
+                'post_type' => $post->post_type
+            ));
+            $wp_query->is_single = true;
+            $wp_query->queried_object = $post;
+            $wp_query->queried_object_id = $post->ID;
+            // $wp_query->is_page = ($post->post_type === 'page');
+            $wp_query->is_singular = true;
+            $wp_query->is_404 = false;
+            // Load the appropriate template
+            $template = get_page_template();
+            //var_dump($template);
+            if (!$template) {
+                $template = get_template_directory() . '/page.php';
+            }
+            if ($template) {
+                include($template);
+            }
+            // Reset post data after custom query
+            wp_reset_postdata();
+        }
+
+        return ob_get_clean();
+    }
 
 
+
+    public function getContentById_crul($id)
+    {
+        //return "---";
         error_reporting(0);
-        update_option('staticGmood', '1');
-
+        // update_option('staticGmood', '1');
         $link = get_permalink($id);
         $http = new \WP_Http();
-        $response = @$http->request($link, ['timeout' => 120]);
-
-        update_option('staticGmood', '0');
+        $response = $http->request($link); //['timeout' => 1]
+        //update_option('staticGmood', '0');
         //ob_clean();
         //WP_Error
         if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
@@ -393,7 +430,9 @@ class Generator
 
     function previewOutput($id = false)
     {
-        update_option('staticGmood', '1');
+        //update_option('staticGmood', '1');
+        // echo $this->getContentById($id);
+        // exit;
         if ($id && !empty($id)) {
             $link = get_permalink($id);
             $http = new \WP_Http();
@@ -406,7 +445,7 @@ class Generator
                 }
             }
         }
-        update_option('staticGmood', '0');
+        //update_option('staticGmood', '0');
     }
 
     /**
