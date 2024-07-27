@@ -431,20 +431,20 @@ class Generator
     function previewOutput($id = false)
     {
         //update_option('staticGmood', '1');
-        // echo $this->getContentById($id);
-        // exit;
-        if ($id && !empty($id)) {
-            $link = get_permalink($id);
-            $http = new \WP_Http();
-            $response = @$http->request($link, ['timeout' => 120]);
-            if (is_a($response, 'WP_Error')) {
-                var_dump($response);
-            } else {
-                if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
-                    echo $response['body'];
-                }
-            }
-        }
+        echo $this->getContentById($id);
+        exit;
+        // if ($id && !empty($id)) {
+        //     $link = get_permalink($id);
+        //     $http = new \WP_Http();
+        //     $response = @$http->request($link, ['timeout' => 120]);
+        //     if (is_a($response, 'WP_Error')) {
+        //         var_dump($response);
+        //     } else {
+        //         if ($response && isset($response['response']['code']) && $response['response']['code'] == 200) {
+        //             echo $response['body'];
+        //         }
+        //     }
+        // }
         //update_option('staticGmood', '0');
     }
 
