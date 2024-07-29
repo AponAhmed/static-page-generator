@@ -146,7 +146,7 @@ class Generator
         global $wp, $perform;
 
         if (is_404()) {
-            if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
+            if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
                 //var_dump($perform);
                 $perform->start('staticpage', 'Static Page Generate', ['file' => __FILE__, 'line' => __LINE__]);
             }
@@ -169,11 +169,24 @@ class Generator
             $slug = preg_replace('/([^:])(\/{2,})/', '$1/', $slug);
             $file = __SPG_CONTENT . "pages/" . $slug;
 
-            if (file_exists($file)) {
+            if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
+                //var_dump($perform);
+                $perform->start('staticFileCheck', 'Static file existance Check', ['file' => __FILE__, 'line' => __LINE__]);
+            }
+
+            $fileExist = file_exists($file);
+
+            if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
+                //var_dump($perform);
+                $perform->end('staticFileCheck');
+            }
+
+
+            if ($fileExist) {
                 http_response_code(200);
                 echo $this->generateContent($file);
 
-                if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
+                if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
                     $perform->end('staticpage');
                     echo $perform->html(true);
                 }
@@ -205,25 +218,30 @@ class Generator
         $data = json_decode($jsonData, true);
         //Example Uses
 
-        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
+        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
             $perform->start('get_static_page_content', 'Static Page Get Content', ['file' => __FILE__, 'line' => __LINE__]);
         }
 
         $content = $this->getContentById($data['id']);
 
-        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE) {
-            $perform->end('get_static_page_content');
-        }
+
 
         $content = str_replace($data['replacer']['find'], $data['replacer']['replace'], $content);
         $content = $this->backEnd->internalLinkFilter($content, $data['slug']);
-        return do_shortcode($content);
+        $content = do_shortcode($content);
+        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
+            $perform->end('get_static_page_content');
+        }
+        return $content;
     }
 
     public function getContentById($id)
     {
-        global $post, $wp_query;
+        global $post, $wp_query, $perform;
         ob_start();
+        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
+            $perform->start('static_template_build', 'Static template build', ['file' => __FILE__, 'line' => __LINE__]);
+        }
         $post = get_post($id);
         if ($post) {
             // Set the global post variable
@@ -253,7 +271,7 @@ class Generator
             // Reset post data after custom query
             wp_reset_postdata();
         }
-
+        $perform->end('static_template_build');
         return ob_get_clean();
     }
 
