@@ -268,10 +268,14 @@ class Generator
             if ($template) {
                 include($template);
             }
+            $wp_query->is_404 = true;
             // Reset post data after custom query
             wp_reset_postdata();
         }
-        $perform->end('static_template_build');
+
+        if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
+            $perform->end('static_template_build');
+        }
         return ob_get_clean();
     }
 
