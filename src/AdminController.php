@@ -60,22 +60,23 @@ class AdminController extends adminViews
         error_reporting(E_ALL);
     }
 
-    function custom_sanitize_slug($string) {
+    function custom_sanitize_slug($string)
+    {
         // Convert to lowercase
         $string = strtolower($string);
-    
+
         // Replace spaces with hyphens
         $string = preg_replace('/\s+/', '-', $string);
-    
+
         // Remove special characters except for curly braces
         $string = preg_replace('/[^\w\-{}\/\.]/', '', $string);
-    
+
         // Replace multiple hyphens with a single hyphen
         $string = preg_replace('/-+/', '-', $string);
-    
+
         // Trim hyphens from the beginning and end of the string
         $string = trim($string, '-');
-    
+
         return $string;
     }
 
@@ -669,7 +670,7 @@ class AdminController extends adminViews
             if (is_array($slugs)) {
                 $slugs = array_unique(array_filter($slugs));
                 foreach ($slugs as $slug) {
-                    $staticPage = __SPG_CONTENT . "pages/" . $slug;
+                    $staticPage = __SPG_CONTENT . "pages/" . $slug . ".txt";
                     if (file_exists($staticPage)) {
                         unlink($staticPage);
                         // $n++;
@@ -758,7 +759,7 @@ class AdminController extends adminViews
                     $slugs = array_unique(array_filter($slugs));
 
                     foreach ($slugs as $slug) {
-                        $staticPage = __SPG_CONTENT . "pages/" . $slug;
+                        $staticPage = __SPG_CONTENT . "pages/" . $slug . ".txt";
                         //var_dump(file_exists($staticPage), $staticPage);
                         if (file_exists($staticPage)) {
                             unlink($staticPage);
@@ -1005,7 +1006,7 @@ class AdminController extends adminViews
      */
     function writeFile($str, $slug)
     {
-        $fileName = __SPG_CONTENT . "pages/" . $slug;
+        $fileName = __SPG_CONTENT . "pages/" . $slug . ".txt";
         $pathInfo = pathinfo($fileName);
         if (!is_dir($pathInfo['dirname'])) {
             mkdir($pathInfo['dirname'], 0777, true);
