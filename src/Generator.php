@@ -48,7 +48,7 @@ class Generator
 
         add_action('template_include', [$this, 'nonCustomSlug'], 0);
 
-        add_action('template_include', [$this, 'staticPostTemplate']);
+        // add_action('template_include', [$this, 'staticPostTemplate']);
         //
         $this->backEnd = new AdminController($this->options);
         // if (is_admin()) {
@@ -175,6 +175,11 @@ class Generator
             }
 
             $fileExist = file_exists($file);
+
+            if ($fileExist === false) {
+                $file = $file . ".txt";
+                $fileExist = file_exists($file);
+            }
 
             if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
                 //var_dump($perform);
@@ -310,7 +315,7 @@ class Generator
             preg_match_all($re, $requestUrl, $matches, PREG_SET_ORDER, 0);
             if (isset($matches[0][2])) {
                 $slug = $matches[0][2];
-                $file = __SPG_CONTENT . "pages/" . $slug;
+                $file = __SPG_CONTENT . "pages/" . $slug . ".txt";
                 if (file_exists($file)) {
                     http_response_code(200);
                     echo $this->generateContent($file);
@@ -440,14 +445,14 @@ class Generator
         }
         return $template;
 
-        $slug = get_query_var('static');
-        $file = __SPG_CONTENT . "pages/" . $slug;
-        if (file_exists($file)) {
-            echo file_get_contents($file);
-        } else {
-            wp_redirect(home_url());
-        }
-        exit;
+        // $slug = get_query_var('static');
+        // $file = __SPG_CONTENT . "pages/" . $slug;
+        // if (file_exists($file)) {
+        //     echo file_get_contents($file);
+        // } else {
+        //     wp_redirect(home_url());
+        // }
+        // exit;
     }
 
     function previewOutput($id = false)
