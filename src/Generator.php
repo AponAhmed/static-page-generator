@@ -226,10 +226,13 @@ class Generator
         if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
             $perform->start('get_static_page_content', 'Static Page Get Content', ['file' => __FILE__, 'line' => __LINE__]);
         }
+        $content = "";
 
-        $content = $this->getContentById($data['id']);
-
-
+        if ($data['id']) {
+            $content = $this->getContentById($data['id']);
+        } else {
+            return $content;
+        }
 
         $content = str_replace($data['replacer']['find'], $data['replacer']['replace'], $content);
         $content = $this->backEnd->internalLinkFilter($content, $data['slug']);
