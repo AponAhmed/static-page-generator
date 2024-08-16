@@ -19,6 +19,8 @@ class Generator
     private  AdminController $backEnd;
     private $options;
 
+    private $currentUrl;
+
     public function __construct()
     {
         //add_action('init', array($this, 'start_timer'), 0);
@@ -155,6 +157,11 @@ class Generator
             $siteUrl = preg_replace('/([^:])(\/{2,})/', '$1/', $siteUrl);
             $current_url = home_url(add_query_arg(array(), $wp->request));
 
+            $this->currentUrl = $current_url;
+            if (substr($current_url, -1) !== '/' && substr($current_url, -5) !== '.html') {
+                $this->currentUrl .= "/";
+            }
+
             $rqUri = $_SERVER['REQUEST_URI'];
             // Check if the URL does not end with a slash and does not contain ".html" at the end
             if (substr($rqUri, -1) !== '/' && substr($rqUri, -5) !== '.html') {
@@ -235,6 +242,13 @@ class Generator
         }
 
         $content = str_replace($data['replacer']['find'], $data['replacer']['replace'], $content);
+        //canonical
+        // Regex pattern to match the canonical link tag
+        $pattern = '/<link\s+rel=["\']canonical["\']\s+href=["\'][^"\']*["\']\s*\/?>/i';
+        // Replace the canonical URL with the new one
+        $replacement = '<link rel="canonical" href="' . $this->currentUrl . '" >';
+        $content = preg_replace($pattern, $replacement, $content);
+
         $content = $this->backEnd->internalLinkFilter($content, $data['slug']);
         $content = do_shortcode($content);
         if ($perform && defined('WP_PERFORMANCE') && WP_PERFORMANCE && is_user_logged_in()) {
